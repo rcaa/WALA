@@ -27,12 +27,22 @@ import com.ibm.wala.util.debug.Assertions;
  */
 public class TypeAnnotationsReader extends AnnotationsReader {
 
-  // required for AnnotationLocation.method_info readers
+  /** 
+   * required for {@link TypeAnnotationLocation#method_info} readers
+   */
   private final ExceptionsReader exceptionReader;
   
   
-  // required for CodeReader AnnotationLocation.code readers;
+  /**
+   * required for {@link TypeAnnotationLocation#Code} readers
+   */
   private final CodeReader codeReader;
+  
+  /** 
+   * required for {@link TypeAnnotationLocation#method_info} 
+   * and for  {@link TypeAnnotationLocation#ClassFile} readers
+   */
+  private final SignatureReader signatureReader;
   
   private final TypeAnnotationLocation location;
   
@@ -41,34 +51,38 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       String label,
       ExceptionsReader exceptionReader,
       CodeReader codeReader,
+      SignatureReader signatureReader,
       TypeAnnotationLocation location
     ) throws InvalidClassFileException {
     super(iter, label);
     this.exceptionReader = exceptionReader;
     this.codeReader = codeReader;
+    this.signatureReader = signatureReader;
     this.location = location;
   }
   
   public static TypeAnnotationsReader getTypeAnnotationReaderAtClassfile(
       ClassReader.AttrIterator iter,
-      String label
+      String label,
+      SignatureReader signatureReader
     ) throws InvalidClassFileException {
-    return new TypeAnnotationsReader(iter, label, null, null, TypeAnnotationLocation.ClassFile);
+    return new TypeAnnotationsReader(iter, label, null, null, signatureReader, TypeAnnotationLocation.ClassFile);
   }
   
   public static TypeAnnotationsReader getTypeAnnotationReaderAtMethodInfo(
       ClassReader.AttrIterator iter,
       String label,
-      ExceptionsReader exceptionReader
+      ExceptionsReader exceptionReader,
+      SignatureReader signatureReader
     ) throws InvalidClassFileException {
-    return new TypeAnnotationsReader(iter, label, exceptionReader, null, TypeAnnotationLocation.method_info);
+    return new TypeAnnotationsReader(iter, label, exceptionReader, null, signatureReader, TypeAnnotationLocation.method_info);
   }
   
   public static TypeAnnotationsReader getTypeAnnotationReaderAtFieldInfo(
       ClassReader.AttrIterator iter,
       String label
     ) throws InvalidClassFileException {
-    return new TypeAnnotationsReader(iter, label, null, null, TypeAnnotationLocation.field_info);
+    return new TypeAnnotationsReader(iter, label, null, null, null, TypeAnnotationLocation.field_info);
   }
   
   public static TypeAnnotationsReader getTypeAnnotationReaderAtCode(
@@ -76,7 +90,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       String label,
       CodeReader codeReader
     ) throws InvalidClassFileException {
-    return new TypeAnnotationsReader(iter, label, null, codeReader, TypeAnnotationLocation.Code);
+    return new TypeAnnotationsReader(iter, label, null, codeReader, null, TypeAnnotationLocation.Code);
   }
   
   
@@ -204,7 +218,8 @@ public class TypeAnnotationsReader extends AnnotationsReader {
         checkSize(begin, 2);
         return Pair.<TypeAnnotationTarget, Integer>make(new TypeParameterBoundTarget(
           cr.getUnsignedByte(begin),
-          cr.getUnsignedByte(begin+1)
+          cr.getUnsignedByte(begin+1),
+          signatureReader.getSignature()
         ), 2);
       }
       case empty_target: {
@@ -252,7 +267,10 @@ public class TypeAnnotationsReader extends AnnotationsReader {
         int exception_table_index = cr.getShort(begin);
         int[] rawHandler = new int[4];
         System.arraycopy(codeReader.getRawHandlers(), exception_table_index*4, rawHandler, 0, 4);
-        return Pair.<TypeAnnotationTarget, Integer>make(new CatchTarget(rawHandler), 2);
+        final String catchType = 
+            rawHandler[3] == 0 ? CatchTarget.ALL_EXCEPTIONS
+                               : cr.getCP().getCPClass(rawHandler[3]);
+        return Pair.<TypeAnnotationTarget, Integer>make(new CatchTarget(rawHandler, catchType), 2);
       }
       case offset_target: {
         checkSize(begin, 2);
@@ -352,6 +370,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       this.target_info = target_info;
       this.location = location;
     }
+    
   }
   
   public static abstract class TypeAnnotationTarget {
@@ -362,6 +381,53 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     public TargetInfo getTargetInfo() {
       return targetInfo;
     }
+    
+    public abstract <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor);
+  }
+  
+  public static interface TypeAnnotationTargetVisitor<R> {
+    R visitTypeParameterTarget(TypeParameterTarget target);
+    R visitSuperTypeTarget(SuperTypeTarget target );
+    R visitTypeParameterBoundTarget(TypeParameterBoundTarget target);
+    R visitEmptyTarget(EmptyTarget target);
+    R visitFormalParameterTarget(FormalParameterTarget target);
+    R visitThrowsTarget(ThrowsTarget target);
+    R visitLocalVarTarget(LocalVarTarget target);
+    R visitCatchTarget(CatchTarget target);
+    R visitOffsetTarget(OffsetTarget target);
+    R visitTypeArgumentTarget(TypeArgumentTarget target);
+  }
+  
+  public class ThrowingTypeAnnotationTargetVisitor<R> implements TypeAnnotationTargetVisitor<R> {
+    @Override
+    public R visitTypeParameterTarget(TypeParameterTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitSuperTypeTarget(SuperTypeTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitTypeParameterBoundTarget(TypeParameterBoundTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitEmptyTarget(EmptyTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitFormalParameterTarget(FormalParameterTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitThrowsTarget(ThrowsTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitLocalVarTarget(LocalVarTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitCatchTarget(CatchTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitOffsetTarget(OffsetTarget target) { throw new UnsupportedOperationException(); }
+
+    @Override
+    public R visitTypeArgumentTarget(TypeArgumentTarget target) { throw new UnsupportedOperationException(); }
   }
   
   public static class TypeParameterTarget extends TypeAnnotationTarget {
@@ -373,6 +439,11 @@ public class TypeAnnotationsReader extends AnnotationsReader {
 
     public int getIndex() {
       return type_parameter_index;
+    }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitTypeParameterTarget(this);
     }
   }
 
@@ -386,16 +457,23 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     public String getSuperType() {
       return superType;
     }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitSuperTypeTarget(this);
+    }
   }
   
   public static class TypeParameterBoundTarget extends TypeAnnotationTarget {
     private final int type_parameter_index;
     private final int bound_index;
+    private final String boundSignature;
     
-    public TypeParameterBoundTarget(int type_parameter_index, int bound_index) {
+    public TypeParameterBoundTarget(int type_parameter_index, int bound_index, String boundSignature) {
       super(TargetInfo.type_parameter_bound_target);
       this.type_parameter_index = type_parameter_index;
       this.bound_index = bound_index;
+      this.boundSignature = boundSignature;
     }
 
     public int getParameterIndex() {
@@ -405,11 +483,25 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     public int getBoundIndex() {
       return bound_index;
     }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitTypeParameterBoundTarget(this);
+    }
+
+    public String getBoundSignature() {
+      return boundSignature;
+    }
   }
 
   public static class EmptyTarget extends TypeAnnotationTarget {
     public EmptyTarget() {
       super(TargetInfo.empty_target);
+    }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitEmptyTarget(this);
     }
   }
 
@@ -424,6 +516,11 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     public int getIndex() {
       return formal_parameter_index;
     }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitFormalParameterTarget(this);
+    }
   }
   
   public static class ThrowsTarget extends TypeAnnotationTarget {
@@ -435,6 +532,11 @@ public class TypeAnnotationsReader extends AnnotationsReader {
 
     public String getThrowType() {
       return throwType;
+    }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitThrowsTarget(this);
     }
   }
   
@@ -451,38 +553,67 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       this.index    = Arrays.copyOf(index, index.length);
     }
     
-    int nrOfRanges() {
+    public int getNrOfRanges() {
       return start_pc.length;
     }
     
-    int startPc(int range) {
+    public int getStartPc(int range) {
       return start_pc[range];
     }
 
-    int length(int range) {
+    public int getLength(int range) {
       return length[range];
     }
 
-    int index(int range) {
+    public int getIndex(int range) {
       return index[range];
+    }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitLocalVarTarget(this);
     }
   }
   
   public static class CatchTarget extends TypeAnnotationTarget {
     private final int[] rawHandler;
+    private final String catchType;
     
-    public CatchTarget(int[] rawHandler) {
+    public static final String ALL_EXCEPTIONS = null;
+    
+    public CatchTarget(int[] rawHandler, String catchType) {
       super(TargetInfo.catch_target);
       this.rawHandler = rawHandler;
+      this.catchType = catchType;
     }
     /**
-     * 
      * @return The type-annotations targets raw handler, i.e.: a 4 tuple (startPC, endPC, catchClassIndex, catchPC)
      * @see CodeReader
      */
     public int[] getRawHandler() {
       // TODO: do we really need to copy here? Can't we trust callees not to change arrays after the fact?
       return Arrays.copyOf(rawHandler, rawHandler.length);
+    }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitCatchTarget(this);
+    }
+
+    public String getCatchType() {
+      return catchType;
+    }
+    
+    public int getStartPC() {
+      return rawHandler[0];
+    }
+    
+    public int getEndPC() {
+      return rawHandler[1];
+    }
+    
+    public int getCatchPC() {
+      return rawHandler[3];
     }
   }
   
@@ -495,6 +626,11 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
     public int getOffset() {
       return offset;
+    }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitOffsetTarget(this);
     }
   }
   
@@ -510,8 +646,13 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     public int getOffset() {
       return offset;
     }
-    public int getType_argument_index() {
+    public int getTypeArgumentIndex() {
       return type_argument_index;
+    }
+    
+    @Override
+    public <R> R acceptVisitor(TypeAnnotationTargetVisitor<R> visitor) {
+      return visitor.visitTypeArgumentTarget(this);
     }
   }
   
@@ -574,20 +715,20 @@ public class TypeAnnotationsReader extends AnnotationsReader {
   private static interface Action {
     TypeAnnotationsReader apply() throws InvalidClassFileException;
   }
-  public static TypeAnnotationsReader getReaderForAnnotationAtClassfile(final AnnotationType type, final ClassReader.AttrIterator iter) {
+  public static TypeAnnotationsReader getReaderForAnnotationAtClassfile(final AnnotationType type, final ClassReader.AttrIterator iter, final SignatureReader signatureReader) {
       return advanceIter(type, iter, new Action() {
         @Override
         public TypeAnnotationsReader apply() throws InvalidClassFileException {
-          return getTypeAnnotationReaderAtClassfile(iter, type.toString()); 
+          return getTypeAnnotationReaderAtClassfile(iter, type.toString(), signatureReader); 
         }
       });
   }
   
-  public static TypeAnnotationsReader getReaderForAnnotationAtMethodInfo(final AnnotationType type, final ClassReader.AttrIterator iter, final ExceptionsReader exceptionReader) {
+  public static TypeAnnotationsReader getReaderForAnnotationAtMethodInfo(final AnnotationType type, final ClassReader.AttrIterator iter, final ExceptionsReader exceptionReader, final SignatureReader signatureReader) {
     return advanceIter(type, iter, new Action() {
       @Override
       public TypeAnnotationsReader apply() throws InvalidClassFileException {
-        return getTypeAnnotationReaderAtMethodInfo(iter, type.toString(), exceptionReader);
+        return getTypeAnnotationReaderAtMethodInfo(iter, type.toString(), exceptionReader, signatureReader);
       }
     });
   }
