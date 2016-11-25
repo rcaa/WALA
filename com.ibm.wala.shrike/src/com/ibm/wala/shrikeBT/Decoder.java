@@ -137,6 +137,8 @@ public abstract class Decoder implements Constants {
 
   private int[] instructionsToBytecodes;
 
+  private int[] bytecodesToInstructions;
+
   final private ConstantPoolReader constantPool;
 
   // Holds the input to decode
@@ -907,6 +909,8 @@ public abstract class Decoder implements Constants {
 
         map[i] = newCodeIndex;
 
+        if (s > 0) bytecodesToInstructions[i] = newCodeIndex;
+
         for (int j = 0; j < s; j++) {
           Instruction instr = decoded.get(offset + j);
           instructions[newCodeIndex] = instr;
@@ -984,6 +988,7 @@ public abstract class Decoder implements Constants {
 
     instructions = new Instruction[instructionsLen];
     instructionsToBytecodes = new int[instructionsLen];
+    bytecodesToInstructions = new int[code.length];
     handlers = new ExceptionHandler[instructionsLen][];
 
     // shuffle decoded instructions into method order
@@ -995,6 +1000,9 @@ public abstract class Decoder implements Constants {
         decodedOffset[i] = p;
 
         int s = decodedSize[i];
+
+        if (s > 0) bytecodesToInstructions[i] = p;
+
         for (int j = 0; j < s; j++) {
           instructions[p] = decoded.get(offset + j);
           instructionsToBytecodes[p] = i;
@@ -1100,5 +1108,18 @@ public abstract class Decoder implements Constants {
       throw new Error("Call decode() before calling getInstructionsToBytecodes()");
     }
     return instructionsToBytecodes;
+  }
+
+  /**
+   * Get the mapping between instructions and input bytecodes.
+   * 
+   * @return an array iindex such that iindex[bcIndex] is the offset in the Instuction array that was generated 
+   *         from the bytecode-instruction at bcIndex
+   */
+  final public int[] getBytecodesToInstructions() {
+    if (bytecodesToInstructions == null) {
+      throw new Error("Call decode() before calling getInstructionsToBytecodes()");
+    }
+    return bytecodesToInstructions;
   }
 }
