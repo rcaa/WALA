@@ -194,7 +194,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
         pAttributeAndSize.fst,
         type_path
       ),
-      annotation_begin + pAnnotationTargetAndSize.snd
+      1 + pAnnotationTargetAndSize.snd + 1 + 2*path_length + pAttributeAndSize.snd
     );
   }
   
@@ -614,7 +614,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
     
     public int getCatchPC() {
-      return rawHandler[3];
+      return rawHandler[2];
     }
   }
   

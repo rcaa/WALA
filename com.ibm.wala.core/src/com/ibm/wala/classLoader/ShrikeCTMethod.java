@@ -403,9 +403,8 @@ public final class ShrikeCTMethod extends ShrikeBTMethod implements IBytecodeMet
   }
   
   private TypeAnnotationsReader getTypeAnnotationsReaderAtCode(TypeAnnotationsReader.AnnotationType type) {
-    ClassReader.AttrIterator iter = new AttrIterator();
-    getClassReader().initMethodAttributeIterator(shrikeMethodIndex, iter);
-
+    ClassReader.AttrIterator iter = new ClassReader.AttrIterator();
+    getCodeReader().initAttributeIterator(iter);
     return TypeAnnotationsReader.getReaderForAnnotationAtCode(type, iter, getCodeReader());
   }
 

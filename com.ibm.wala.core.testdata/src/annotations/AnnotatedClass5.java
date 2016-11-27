@@ -30,6 +30,7 @@ public class AnnotatedClass5 extends @TypeAnnotationTypeUse Object {
     try {
       throw new NullPointerException();
     } catch (@TypeAnnotationTypeUse RuntimeException e) {
+      x = 911;
     }
     
     return x;
