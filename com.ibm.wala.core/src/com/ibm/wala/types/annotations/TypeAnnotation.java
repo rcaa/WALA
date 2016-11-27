@@ -239,7 +239,7 @@ public class TypeAnnotation {
   
   public static interface TypeAnnotationTargetConverter extends TypeAnnotationTargetVisitor<TypeAnnotationTarget> {}
   
-  static TypeAnnotationTargetConverter targetConverterAtCode(final ClassLoaderReference clRef, final IBytecodeMethod method) {
+  public static TypeAnnotationTargetConverter targetConverterAtCode(final ClassLoaderReference clRef, final IBytecodeMethod method) {
     return new TypeAnnotationTargetConverter() {
       @Override
       public TypeAnnotationTarget visitTypeParameterTarget(com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypeParameterTarget target) {
@@ -342,7 +342,7 @@ public class TypeAnnotation {
   }
 
   // TODO: method is currently unused, but we may want to use it if we decide to resolve generic signature indices here
-  static TypeAnnotationTargetConverter targetConverterAtMethodInfo(final ClassLoaderReference clRef, final IBytecodeMethod method) {
+  public static TypeAnnotationTargetConverter targetConverterAtMethodInfo(final ClassLoaderReference clRef, final IBytecodeMethod method) {
     return new TypeAnnotationTargetConverter() {
       @Override
       public TypeAnnotationTarget visitTypeParameterTarget(com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypeParameterTarget target) {
@@ -406,7 +406,7 @@ public class TypeAnnotation {
     };
   }
   
-  static TypeAnnotationTargetConverter targetConverterAtClassFile(final ClassLoaderReference clRef) {
+  public static TypeAnnotationTargetConverter targetConverterAtClassFile(final ClassLoaderReference clRef) {
     return new TypeAnnotationTargetConverter() {
       @Override
       public TypeAnnotationTarget visitTypeParameterTarget(com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypeParameterTarget target) {
@@ -470,7 +470,7 @@ public class TypeAnnotation {
     };
   }
   
-  static TypeAnnotationTargetConverter targetConverterAtFieldInfo(final ClassLoaderReference clRef) {
+  public static TypeAnnotationTargetConverter targetConverterAtFieldInfo(final ClassLoaderReference clRef) {
     return new TypeAnnotationTargetConverter() {
       @Override
       public TypeAnnotationTarget visitTypeParameterTarget(com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypeParameterTarget target) {
