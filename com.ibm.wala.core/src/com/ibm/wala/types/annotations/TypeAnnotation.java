@@ -20,6 +20,7 @@ import com.ibm.wala.shrikeCT.AnnotationsReader;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader;
 import com.ibm.wala.shrikeCT.AnnotationsReader.AnnotationAttribute;
+import com.ibm.wala.shrikeCT.AnnotationsReader.ElementValue;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TargetInfo;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TargetType;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypeAnnotationAttribute;
@@ -37,12 +38,52 @@ public class TypeAnnotation {
   private final List<Pair<TypePathKind, Integer>> typePath;
   private final TypeAnnotationTarget typeAnnotationTarget;
     
-  public TypeAnnotation(Annotation annotation, List<Pair<TypePathKind, Integer>> typePath, TypeAnnotationTarget typeAnnotationTarget) {
+  private TypeAnnotation(Annotation annotation, List<Pair<TypePathKind, Integer>> typePath, TypeAnnotationTarget typeAnnotationTarget) {
     this.annotation = annotation;
     this.typePath = Collections.unmodifiableList(typePath);
     this.typeAnnotationTarget = typeAnnotationTarget;
   }
   
+  
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((annotation == null) ? 0 : annotation.hashCode());
+    result = prime * result + ((typeAnnotationTarget == null) ? 0 : typeAnnotationTarget.hashCode());
+    result = prime * result + ((typePath == null) ? 0 : typePath.hashCode());
+    return result;
+  }
+
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    TypeAnnotation other = (TypeAnnotation) obj;
+    if (annotation == null) {
+      if (other.annotation != null)
+        return false;
+    } else if (!annotation.equals(other.annotation))
+      return false;
+    if (typeAnnotationTarget == null) {
+      if (other.typeAnnotationTarget != null)
+        return false;
+    } else if (!typeAnnotationTarget.equals(other.typeAnnotationTarget))
+      return false;
+    if (typePath == null) {
+      if (other.typePath != null)
+        return false;
+    } else if (!typePath.equals(other.typePath))
+      return false;
+    return true;
+  }
+
+
   public static Collection<TypeAnnotation> getTypeAnnotationsFromReader(TypeAnnotationsReader r, TypeAnnotationTargetConverter converter, ClassLoaderReference clRef) throws InvalidClassFileException {
     if (r != null) {
       TypeAnnotationAttribute[] allTypeAnnotations = r.getAllTypeAnnotations();
@@ -70,6 +111,14 @@ public class TypeAnnotation {
     
   }
   
+  public static TypeAnnotation make(Annotation annotation, List<Pair<TypePathKind, Integer>> typePath, TypeAnnotationTarget typeAnnotationTarget) {
+    return new TypeAnnotation(annotation, typePath, typeAnnotationTarget);
+  }
+
+  public static TypeAnnotation make(Annotation annotation, TypeAnnotationTarget typeAnnotationTarget) {
+    return new TypeAnnotation(annotation, TypeAnnotationsReader.TYPEPATH_EMPTY, typeAnnotationTarget);
+  }
+  
   public static abstract class TypeAnnotationTarget {
     public static final int INSTRUCTION_INDEX_UNAVAILABLE = -1;
   }
@@ -84,6 +133,28 @@ public class TypeAnnotation {
     public int getIndex() {
       return type_parameter_index;
     }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + type_parameter_index;
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      TypeParameterTarget other = (TypeParameterTarget) obj;
+      if (type_parameter_index != other.type_parameter_index)
+        return false;
+      return true;
+    }
   }
 
   public static class SuperTypeTarget extends TypeAnnotationTarget {
@@ -94,6 +165,31 @@ public class TypeAnnotation {
 
     public TypeReference getSuperType() {
       return superType;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((superType == null) ? 0 : superType.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      SuperTypeTarget other = (SuperTypeTarget) obj;
+      if (superType == null) {
+        if (other.superType != null)
+          return false;
+      } else if (!superType.equals(other.superType))
+        return false;
+      return true;
     }
   }
   
@@ -114,10 +210,54 @@ public class TypeAnnotation {
       return bound_index;
     }
 
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + bound_index;
+      result = prime * result + type_parameter_index;
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      TypeParameterBoundTarget other = (TypeParameterBoundTarget) obj;
+      if (bound_index != other.bound_index)
+        return false;
+      if (type_parameter_index != other.type_parameter_index)
+        return false;
+      return true;
+    }
+
+    
   }
 
   public static class EmptyTarget extends TypeAnnotationTarget {
     public EmptyTarget() {
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      return true;
     }
   }
 
@@ -131,7 +271,28 @@ public class TypeAnnotation {
     public int getIndex() {
       return formal_parameter_index;
     }
-    
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + formal_parameter_index;
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      FormalParameterTarget other = (FormalParameterTarget) obj;
+      if (formal_parameter_index != other.formal_parameter_index)
+        return false;
+      return true;
+    }
   }
   
   public static class ThrowsTarget extends TypeAnnotationTarget {
@@ -142,6 +303,31 @@ public class TypeAnnotation {
 
     public TypeReference getThrowType() {
       return throwType;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((throwType == null) ? 0 : throwType.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      ThrowsTarget other = (ThrowsTarget) obj;
+      if (throwType == null) {
+        if (other.throwType != null)
+          return false;
+      } else if (!throwType.equals(other.throwType))
+        return false;
+      return true;
     }
   }
   
@@ -155,11 +341,41 @@ public class TypeAnnotation {
       this.varIindex = varIindex;
       this.name = name;
     }
+
     public int getIndex() {
       return varIindex;
     }
+
     public String getName() {
       return name;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((name == null) ? 0 : name.hashCode());
+      result = prime * result + varIindex;
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      LocalVarTarget other = (LocalVarTarget) obj;
+      if (name == null) {
+        if (other.name != null)
+          return false;
+      } else if (!name.equals(other.name))
+        return false;
+      if (varIindex != other.varIindex)
+        return false;
+      return true;
     }
   }
   
@@ -167,22 +383,22 @@ public class TypeAnnotation {
     // TODO: as per LocalVarTarget, can we record a meaningful range in terms of IInstriction[]
     private final int catchIIndex;
     private final TypeReference catchType;
-    
+
     // TODO: or should this be TypeReference.JavaLangThrowable?
     public static final TypeReference ALL_EXCEPTIONS = null;
-    
+
     public CatchTarget(int catchIIndex, TypeReference catchType) {
       this.catchIIndex = catchIIndex;
       this.catchType = catchType;
     }
-    
+
     /**
      * @return the handlers type, or {@link CatchTarget#ALL_EXCEPTIONS}
      */
     public TypeReference getCatchType() {
       return catchType;
     }
-    
+
     /**
      * @return the handlers instruction index (if available),
      *         or {@link TypeAnnotationTarget#INSTRUCTION_INDEX_UNAVAILABLE} otherwise.
@@ -190,16 +406,43 @@ public class TypeAnnotation {
     public int getCatchIIndex() {
       return catchIIndex;
     }
-    
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + catchIIndex;
+      result = prime * result + ((catchType == null) ? 0 : catchType.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      CatchTarget other = (CatchTarget) obj;
+      if (catchIIndex != other.catchIIndex)
+        return false;
+      if (catchType == null) {
+        if (other.catchType != null)
+          return false;
+      } else if (!catchType.equals(other.catchType))
+        return false;
+      return true;
+    }
   }
   
   public static class OffsetTarget extends TypeAnnotationTarget {
     private final int iindex;
-    
+
     public OffsetTarget(int iindex) {
       this.iindex = iindex;
     }
-    
+
     /**
      * @return the targets instruction index (if available), 
      *         or {@link TypeAnnotationTarget#INSTRUCTION_INDEX_UNAVAILABLE} otherwise.
@@ -207,21 +450,70 @@ public class TypeAnnotation {
     public int getIIndex() {
       return iindex;
     }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + iindex;
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      OffsetTarget other = (OffsetTarget) obj;
+      if (iindex != other.iindex)
+        return false;
+      return true;
+    }
   }
   
   public static class TypeArgumentTarget extends TypeAnnotationTarget {
     private final int iindex;
     private final int type_argument_index;
-    
+
     public TypeArgumentTarget(int iindex, int type_argument_index) {
       this.iindex = iindex;
       this.type_argument_index = type_argument_index;
     }
+
     public int getOffset() {
       return iindex;
     }
+
     public int getType_argument_index() {
       return type_argument_index;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + iindex;
+      result = prime * result + type_argument_index;
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      TypeArgumentTarget other = (TypeArgumentTarget) obj;
+      if (iindex != other.iindex)
+        return false;
+      if (type_argument_index != other.type_argument_index)
+        return false;
+      return true;
     }
   }
   
@@ -229,14 +521,13 @@ public class TypeAnnotation {
     return TypeReference.findOrCreate(clRef, typeName.replaceAll(";", ""));
   }
 
-  
   private static boolean mayAppearIn(TargetInfo info, TypeAnnotationLocation location) {
     for (TargetType targetType : TargetType.values()) {
       if (targetType.target_info == info && targetType.location == location) return true; 
     }
     return false;
   }
-  
+
   public static interface TypeAnnotationTargetConverter extends TypeAnnotationTargetVisitor<TypeAnnotationTarget> {}
   
   public static TypeAnnotationTargetConverter targetConverterAtCode(final ClassLoaderReference clRef, final IBytecodeMethod method) {

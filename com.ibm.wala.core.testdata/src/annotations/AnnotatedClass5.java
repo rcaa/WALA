@@ -13,8 +13,7 @@
  *******************************************************************************/
 package annotations;
 
-@TypeAnnotationTypeUse
-public class AnnotatedClass5 {
+public class AnnotatedClass5 extends @TypeAnnotationTypeUse Object {
   
   @TypeAnnotationTypeUse Integer foo(@TypeAnnotationTypeUse int a, @TypeAnnotationTypeUse Object b) {
     

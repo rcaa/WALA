@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypePathKind;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;
@@ -685,6 +686,8 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       return fromValue.get(value);
     }
   }
+  
+  public static final List<Pair<TypePathKind, Integer>> TYPEPATH_EMPTY = Collections.emptyList();
   
   public static class TypeAnnotationAttribute {
     public final TypeAnnotationTarget annotationTarget;
