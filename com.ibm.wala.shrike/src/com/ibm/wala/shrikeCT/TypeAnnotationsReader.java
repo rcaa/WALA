@@ -167,9 +167,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
     
     final Pair<TypeAnnotationTarget, Integer> pAnnotationTargetAndSize =
-      getTypeAnnotationTargetAndSize(begin, target_type.target_info); 
+      getTypeAnnotationTargetAndSize(begin+1, target_type.target_info); 
     
-    final int type_path_offset = 1 + pAnnotationTargetAndSize.snd;
+    final int type_path_offset = begin + 1 + pAnnotationTargetAndSize.snd;
     checkSize(type_path_offset, 1);
     final int path_length = cr.getUnsignedByte(type_path_offset);
     checkSize(type_path_offset + 1, 2 * path_length);
@@ -206,7 +206,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       }
       case supertype_target: {
         checkSize(begin, 2);
-        final int interfaceIndex = cr.getShort(begin);
+        final int interfaceIndex = cr.getUShort(begin);
         final String superType;
         if (interfaceIndex == 65535) {
           superType = cr.getSuperName();
@@ -233,7 +233,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       case throws_target: {
         assert exceptionReader != null;
         checkSize(begin, 2);
-        final int throwsIndex = cr.getShort(begin);
+        final int throwsIndex = cr.getUShort(begin);
         return Pair.<TypeAnnotationTarget, Integer>make(new ThrowsTarget(exceptionReader.getClasses()[throwsIndex]), 2);
         
         /*
@@ -248,7 +248,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       }
       case localvar_target: {
         checkSize(begin, 2);
-        final int table_length = cr.getShort(begin);
+        final int table_length = cr.getUShort(begin);
         final int offset = begin+2;
         checkSize(offset, (2+2+2)*table_length);
         int[] start_pc = new int[table_length];
@@ -256,16 +256,16 @@ public class TypeAnnotationsReader extends AnnotationsReader {
         int[] index = new int[table_length];
         
         for (int i = 0; i < table_length; i++) {
-          start_pc[i] = cr.getShort(offset +     (2+2+2)*i);
-          length[i]   = cr.getShort(offset + 2 + (2+2+2)*i);
-          index[i]    = cr.getShort(offset + 4 + (2+2+2)*i);
+          start_pc[i] = cr.getUShort(offset +     (2+2+2)*i);
+          length[i]   = cr.getUShort(offset + 2 + (2+2+2)*i);
+          index[i]    = cr.getUShort(offset + 4 + (2+2+2)*i);
         }
         return Pair.<TypeAnnotationTarget, Integer>make(new LocalVarTarget(start_pc, length, index), 2 + (2+2+2)*table_length);
       }
       case catch_target: {
         assert codeReader != null;
         checkSize(begin, 2);
-        int exception_table_index = cr.getShort(begin);
+        int exception_table_index = cr.getUShort(begin);
         int[] rawHandler = new int[4];
         System.arraycopy(codeReader.getRawHandlers(), exception_table_index*4, rawHandler, 0, 4);
         final String catchType = 
@@ -275,12 +275,12 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       }
       case offset_target: {
         checkSize(begin, 2);
-        int offset  = cr.getShort(begin);
+        int offset  = cr.getUShort(begin);
         return Pair.<TypeAnnotationTarget, Integer>make(new OffsetTarget(offset), 2);
       }
       case type_argument_target: {
         checkSize(begin, 3);
-        int offset  = cr.getShort(begin);
+        int offset  = cr.getUShort(begin);
         int type_argument_index = cr.getUnsignedByte(begin);
         return Pair.<TypeAnnotationTarget, Integer>make(new TypeArgumentTarget(offset, type_argument_index), 3);
       }

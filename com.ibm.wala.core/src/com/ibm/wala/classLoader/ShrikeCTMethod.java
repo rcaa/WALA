@@ -472,7 +472,7 @@ public final class ShrikeCTMethod extends ShrikeBTMethod implements IBytecodeMet
   public Collection<TypeAnnotation> getTypeAnnotationsAtMethodInfo(boolean runtimeInvisible) throws InvalidClassFileException {
     TypeAnnotationsReader r = getTypeAnnotationsReaderAtMethodInfo(
         runtimeInvisible ? TypeAnnotationsReader.AnnotationType.RuntimeInvisibleTypeAnnotations
-                         : TypeAnnotationsReader.AnnotationType.RuntimeInvisibleTypeAnnotations
+                         : TypeAnnotationsReader.AnnotationType.RuntimeVisibleTypeAnnotations
     );
     final ClassLoaderReference clRef = getDeclaringClass().getClassLoader().getReference();
     return TypeAnnotation.getTypeAnnotationsFromReader(
@@ -485,7 +485,7 @@ public final class ShrikeCTMethod extends ShrikeBTMethod implements IBytecodeMet
   public Collection<TypeAnnotation> getTypeAnnotationsAtCode(boolean runtimeInvisible) throws InvalidClassFileException {
     TypeAnnotationsReader r = getTypeAnnotationsReaderAtCode(
         runtimeInvisible ? TypeAnnotationsReader.AnnotationType.RuntimeInvisibleTypeAnnotations
-                         : TypeAnnotationsReader.AnnotationType.RuntimeInvisibleTypeAnnotations
+                         : TypeAnnotationsReader.AnnotationType.RuntimeVisibleTypeAnnotations
     );
     final ClassLoaderReference clRef = getDeclaringClass().getClassLoader().getReference();
     return TypeAnnotation.getTypeAnnotationsFromReader(

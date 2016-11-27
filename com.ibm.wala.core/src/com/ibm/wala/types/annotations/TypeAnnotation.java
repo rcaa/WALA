@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeMap;
 
 import com.ibm.wala.classLoader.IBytecodeMethod;
 import com.ibm.wala.shrikeCT.AnnotationsReader;
@@ -44,7 +45,20 @@ public class TypeAnnotation {
     this.typeAnnotationTarget = typeAnnotationTarget;
   }
   
-  
+
+  @Override
+  public String toString() {
+    StringBuffer sb = new StringBuffer("TypeAnnotation");
+    sb.append("{ annotation = ");
+    sb.append(annotation);
+    sb.append(", path = ");
+    sb.append(typePath);
+    sb.append(", target = ");
+    sb.append(typeAnnotationTarget);
+    sb.append("}");
+    return sb.toString();
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -54,7 +68,6 @@ public class TypeAnnotation {
     result = prime * result + ((typePath == null) ? 0 : typePath.hashCode());
     return result;
   }
-
 
   @Override
   public boolean equals(Object obj) {
@@ -82,8 +95,7 @@ public class TypeAnnotation {
       return false;
     return true;
   }
-
-
+  
   public static Collection<TypeAnnotation> getTypeAnnotationsFromReader(TypeAnnotationsReader r, TypeAnnotationTargetConverter converter, ClassLoaderReference clRef) throws InvalidClassFileException {
     if (r != null) {
       TypeAnnotationAttribute[] allTypeAnnotations = r.getAllTypeAnnotations();
@@ -135,6 +147,15 @@ public class TypeAnnotation {
     }
 
     @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("TypeParameterTarget");
+      sb.append("{ type_parameter_index = ");
+      sb.append(type_parameter_index);
+      sb.append("}");
+      return sb.toString();
+    }
+
+    @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
@@ -165,6 +186,15 @@ public class TypeAnnotation {
 
     public TypeReference getSuperType() {
       return superType;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("SuperTypeTarget");
+      sb.append("{ superType = ");
+      sb.append(superType);
+      sb.append("}");
+      return sb.toString();
     }
 
     @Override
@@ -200,6 +230,17 @@ public class TypeAnnotation {
     public TypeParameterBoundTarget(int type_parameter_index, int bound_index) {
       this.type_parameter_index = type_parameter_index;
       this.bound_index = bound_index;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("TypeParameterBoundTarget");
+      sb.append("{ type_parameter_index = ");
+      sb.append(type_parameter_index);
+      sb.append(", bound_index = ");
+      sb.append(bound_index);
+      sb.append("}");
+      return sb.toString();
     }
 
     public int getParameterIndex() {
@@ -243,6 +284,11 @@ public class TypeAnnotation {
     }
 
     @Override
+    public String toString() {
+      return "EmptyTarget";
+    }
+
+    @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
@@ -270,6 +316,15 @@ public class TypeAnnotation {
 
     public int getIndex() {
       return formal_parameter_index;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("FormalParameterTarget");
+      sb.append("{ formal_parameter_index = ");
+      sb.append(formal_parameter_index);
+      sb.append("}");
+      return sb.toString();
     }
 
     @Override
@@ -303,6 +358,15 @@ public class TypeAnnotation {
 
     public TypeReference getThrowType() {
       return throwType;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("ThrowsTarget");
+      sb.append("{ throwType = ");
+      sb.append(throwType);
+      sb.append("}");
+      return sb.toString();
     }
 
     @Override
@@ -340,6 +404,17 @@ public class TypeAnnotation {
     public LocalVarTarget(int varIindex, String name) {
       this.varIindex = varIindex;
       this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("LocalVarTarget");
+      sb.append("{ varIindex = ");
+      sb.append(varIindex);
+      sb.append(", name = ");
+      sb.append(name);
+      sb.append("}");
+      return sb.toString();
     }
 
     public int getIndex() {
@@ -408,6 +483,17 @@ public class TypeAnnotation {
     }
 
     @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("CatchTarget");
+      sb.append("{ catchIIndex = ");
+      sb.append(catchIIndex);
+      sb.append(", catchType = ");
+      sb.append(catchType);
+      sb.append("}");
+      return sb.toString();
+    }
+
+    @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
@@ -452,6 +538,15 @@ public class TypeAnnotation {
     }
 
     @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("OffsetTarget");
+      sb.append("{ iindex = ");
+      sb.append(iindex);
+      sb.append("}");
+      return sb.toString();
+    }
+
+    @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
@@ -492,6 +587,17 @@ public class TypeAnnotation {
     }
 
     @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("TypeArgumentTarget");
+      sb.append("{ iindex = ");
+      sb.append(iindex);
+      sb.append(", type_argument_index = ");
+      sb.append(type_argument_index);
+      sb.append("}");
+      return sb.toString();
+    }
+
+    @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
@@ -518,7 +624,9 @@ public class TypeAnnotation {
   }
   
   private static TypeReference fromString(ClassLoaderReference clRef, String typeName) {
-    return TypeReference.findOrCreate(clRef, typeName.replaceAll(";", ""));
+    // TODO: should we not use some lookup that try to (recursively) find a TypeReference in clRefs parents,
+    // and only create a new TypeReference in clRef if this fails? I can't find a such a utility method, though..?!?!
+    return TypeReference.findOrCreate(clRef, "L"+typeName.replaceAll(";", ""));
   }
 
   private static boolean mayAppearIn(TargetInfo info, TypeAnnotationLocation location) {

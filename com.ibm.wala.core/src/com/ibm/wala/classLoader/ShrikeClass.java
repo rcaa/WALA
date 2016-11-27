@@ -294,7 +294,7 @@ public final class ShrikeClass extends JVMClass<IClassLoader> {
     
     return TypeAnnotationsReader.getReaderForAnnotationAtClassfile(
         runtimeInvisible ? TypeAnnotationsReader.AnnotationType.RuntimeInvisibleTypeAnnotations
-                         : TypeAnnotationsReader.AnnotationType.RuntimeInvisibleTypeAnnotations,
+                         : TypeAnnotationsReader.AnnotationType.RuntimeVisibleTypeAnnotations,
         attrs,
         getSignatureReader(-1)
     );
@@ -355,7 +355,7 @@ public final class ShrikeClass extends JVMClass<IClassLoader> {
 
     return TypeAnnotationsReader.getReaderForAnnotationAtFieldInfo(
         runtimeInvisible ? TypeAnnotationsReader.AnnotationType.RuntimeInvisibleTypeAnnotations
-                         : TypeAnnotationsReader.AnnotationType.RuntimeInvisibleTypeAnnotations,
+                         : TypeAnnotationsReader.AnnotationType.RuntimeVisibleTypeAnnotations,
         iter
     );
     
