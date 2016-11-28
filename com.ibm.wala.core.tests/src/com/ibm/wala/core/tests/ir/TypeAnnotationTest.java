@@ -13,9 +13,12 @@ package com.ibm.wala.core.tests.ir;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.Test;
 
+import com.ibm.wala.classLoader.FieldImpl;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.ShrikeBTMethod;
@@ -27,6 +30,8 @@ import com.ibm.wala.core.tests.util.WalaTestCase;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import com.ibm.wala.shrikeCT.TypeAnnotationsReader;
+import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypePathKind;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.Selector;
@@ -34,6 +39,8 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.types.annotations.TypeAnnotation;
 import com.ibm.wala.util.collections.HashSetFactory;
+import com.ibm.wala.util.collections.Pair;
+import com.ibm.wala.util.strings.Atom;
 
 public class TypeAnnotationTest extends WalaTestCase {
 
@@ -149,6 +156,37 @@ public class TypeAnnotationTest extends WalaTestCase {
 
     testMethodAnnotations(methodRefUnderTest, expectedRuntimeInvisibleAnnotations, expectedRuntimeVisibleAnnotations);
   }
+  
+  @Test
+  public void testClassAnnotations5field() throws Exception {
+    TypeReference typeUnderTest = TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/AnnotatedClass5");
+
+    
+    Collection<TypeAnnotation> expectedAnnotations = HashSetFactory.make();
+    expectedAnnotations.add(
+        TypeAnnotation.make(
+            Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
+            TypeAnnotationsReader.TYPEPATH_EMPTY,
+            new TypeAnnotation.EmptyTarget()
+        )
+    );
+    
+    final List<Pair<TypePathKind, Integer>> path = new LinkedList<Pair<TypePathKind,Integer>>();
+    path.add(Pair.make(TypeAnnotationsReader.TypePathKind.TYPE_ARGUMENT, 0));
+    path.add(Pair.make(TypeAnnotationsReader.TypePathKind.TYPE_ARGUMENT, 0));
+    
+    expectedAnnotations.add(
+        TypeAnnotation.make(
+            Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
+            path,
+            new TypeAnnotation.EmptyTarget()
+        )
+    );
+
+    Collection<TypeAnnotation> expectedRuntimeVisibleAnnotations = HashSetFactory.make();
+
+    testFieldAnnotations(typeUnderTest, expectedAnnotations);
+  }
 
   private void testClassAnnotations(TypeReference typeUnderTest, Collection<TypeAnnotation> expectedRuntimeInvisibleAnnotations,
       Collection<TypeAnnotation> expectedRuntimeVisibleAnnotations) throws IOException, ClassHierarchyException,
@@ -182,5 +220,19 @@ public class TypeAnnotationTest extends WalaTestCase {
     runtimeVisibleAnnotations.addAll(bcMethodUnderTest.getTypeAnnotationsAtCode(false));
     runtimeVisibleAnnotations.addAll(bcMethodUnderTest.getTypeAnnotationsAtMethodInfo(false));
     harness.assertEqualCollections(expectedRuntimeVisibleAnnotations, runtimeVisibleAnnotations);
+  }
+  
+  
+  private void testFieldAnnotations(TypeReference typeUnderTest, Collection<TypeAnnotation> expectedAnnotations) throws IOException, ClassHierarchyException,
+      InvalidClassFileException {
+    IClass classUnderTest = cha.lookupClass(typeUnderTest);
+    harness.assertNotNull(typeUnderTest.toString() + " not found", classUnderTest);
+    harness.assertTrue(classUnderTest + " must be BytecodeClass", classUnderTest instanceof ShrikeClass);
+    ShrikeClass bcClassUnderTest = (ShrikeClass) classUnderTest;
+
+    final Atom fieldName = Atom.findOrCreateUnicodeAtom("field");
+    FieldImpl field = (FieldImpl) bcClassUnderTest.getField(fieldName);
+    Collection<TypeAnnotation> annotations = field.getTypeAnnotations();
+    harness.assertEqualCollections(expectedAnnotations, annotations);
   }
 }

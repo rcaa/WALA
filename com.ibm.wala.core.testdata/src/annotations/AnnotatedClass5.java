@@ -13,7 +13,14 @@
  *******************************************************************************/
 package annotations;
 
+import java.util.List;
+import java.util.Set;
+
 public class AnnotatedClass5 extends @TypeAnnotationTypeUse Object {
+  
+  
+  @TypeAnnotationTypeUse
+  List<Set<@TypeAnnotationTypeUse AnnotatedClass5>> field;
   
   @TypeAnnotationTypeUse Integer foo(@TypeAnnotationTypeUse int a, @TypeAnnotationTypeUse Object b) {
     

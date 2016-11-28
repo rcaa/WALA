@@ -179,7 +179,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     for (int i = 0; i < path_length; i++) {
       TypePathKind type_path_kind = TypePathKind.fromValue(cr.getUnsignedByte(current_path_element));
       int type_argument_index = cr.getUnsignedByte(current_path_element + 1);
-      type_path.set(i, Pair.make(type_path_kind, type_argument_index));
+      type_path.add(i, Pair.make(type_path_kind, type_argument_index));
       current_path_element += 2;
     }
     
