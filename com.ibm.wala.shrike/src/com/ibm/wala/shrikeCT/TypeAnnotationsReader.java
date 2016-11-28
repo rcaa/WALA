@@ -192,7 +192,8 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       new TypeAnnotationAttribute(
         pAnnotationTargetAndSize.fst,
         pAttributeAndSize.fst,
-        type_path
+        type_path,
+        target_type
       ),
       1 + pAnnotationTargetAndSize.snd + 1 + 2*path_length + pAttributeAndSize.snd
     );
@@ -693,16 +694,18 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     public final TypeAnnotationTarget annotationTarget;
     public final AnnotationAttribute annotationAttribute;
     public final List<Pair<TypePathKind, Integer>> typePath;
+    public final TargetType targetType;
     
     public TypeAnnotationAttribute(
       TypeAnnotationTarget annotationTarget,
       AnnotationAttribute annotationAttribute,
-      List<Pair<TypePathKind, Integer>> typePath
-      
+      List<Pair<TypePathKind, Integer>> typePath,
+      TargetType targetType
     ) {
       this.annotationTarget = annotationTarget;
       this.annotationAttribute = annotationAttribute;
       this.typePath = Collections.unmodifiableList(typePath);
+      this.targetType = targetType;
     }
   }
   

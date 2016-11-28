@@ -21,7 +21,6 @@ import org.junit.Test;
 import com.ibm.wala.classLoader.FieldImpl;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.classLoader.ShrikeBTMethod;
 import com.ibm.wala.classLoader.ShrikeCTMethod;
 import com.ibm.wala.classLoader.ShrikeClass;
 import com.ibm.wala.core.tests.util.JVMLTestAssertions;
@@ -31,6 +30,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader;
+import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TargetType;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypePathKind;
 import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
@@ -68,7 +68,8 @@ public class TypeAnnotationTest extends WalaTestCase {
             // TODO: currently, annotations will reference class loaders from which they were loaded, even if the type
             // comes from, e.g., primordial (e.g.: Application instead of Primordial).
             // See {@link TypeAnnotation#fromString(ClassLoaderReference, String)}
-            new TypeAnnotation.SuperTypeTarget(TypeReference.findOrCreate(ClassLoaderReference.Application, "Ljava/lang/Object"))
+            new TypeAnnotation.SuperTypeTarget(TypeReference.findOrCreate(ClassLoaderReference.Application, "Ljava/lang/Object")),
+            TargetType.CLASS_EXTENDS
         )
     );
 
@@ -102,14 +103,16 @@ public class TypeAnnotationTest extends WalaTestCase {
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
-            new TypeAnnotation.LocalVarTarget(3, "x")
+            new TypeAnnotation.LocalVarTarget(3, "x"),
+            TargetType.LOCAL_VARIABLE
         )
     );
 
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
-            new TypeAnnotation.LocalVarTarget(4, "y")
+            new TypeAnnotation.LocalVarTarget(4, "y"),
+            TargetType.LOCAL_VARIABLE
         )
     );
 
@@ -118,7 +121,8 @@ public class TypeAnnotationTest extends WalaTestCase {
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
-            new TypeAnnotation.CatchTarget(catchIIndex, runtimeExceptionRef)
+            new TypeAnnotation.CatchTarget(catchIIndex, runtimeExceptionRef),
+            TargetType.EXCEPTION_PARAMETER
         )
     );
     
@@ -127,28 +131,32 @@ public class TypeAnnotationTest extends WalaTestCase {
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
-            new TypeAnnotation.OffsetTarget(instanceOfIIndex)
+            new TypeAnnotation.OffsetTarget(instanceOfIIndex),
+            TargetType.INSTANCEOF
         )
     );
     
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
-            new TypeAnnotation.EmptyTarget()
+            new TypeAnnotation.EmptyTarget(),
+            TargetType.METHOD_RETURN
         )
     );
     
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
-            new TypeAnnotation.FormalParameterTarget(0)
+            new TypeAnnotation.FormalParameterTarget(0),
+            TargetType.METHOD_FORMAL_PARAMETER
         )
     );
     
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
-            new TypeAnnotation.FormalParameterTarget(1)
+            new TypeAnnotation.FormalParameterTarget(1),
+            TargetType.METHOD_FORMAL_PARAMETER
         )
     );
 
@@ -167,7 +175,8 @@ public class TypeAnnotationTest extends WalaTestCase {
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
             TypeAnnotationsReader.TYPEPATH_EMPTY,
-            new TypeAnnotation.EmptyTarget()
+            new TypeAnnotation.EmptyTarget(),
+            TargetType.FIELD
         )
     );
     
@@ -179,11 +188,10 @@ public class TypeAnnotationTest extends WalaTestCase {
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
             path,
-            new TypeAnnotation.EmptyTarget()
+            new TypeAnnotation.EmptyTarget(),
+            TargetType.FIELD
         )
     );
-
-    Collection<TypeAnnotation> expectedRuntimeVisibleAnnotations = HashSetFactory.make();
 
     testFieldAnnotations(typeUnderTest, expectedAnnotations);
   }

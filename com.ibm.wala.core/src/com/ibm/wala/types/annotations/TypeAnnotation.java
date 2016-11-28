@@ -38,11 +38,14 @@ public class TypeAnnotation {
   private final Annotation annotation;
   private final List<Pair<TypePathKind, Integer>> typePath;
   private final TypeAnnotationTarget typeAnnotationTarget;
+  private final TargetType targetType;
     
-  private TypeAnnotation(Annotation annotation, List<Pair<TypePathKind, Integer>> typePath, TypeAnnotationTarget typeAnnotationTarget) {
+  private TypeAnnotation(Annotation annotation, List<Pair<TypePathKind, Integer>> typePath,
+      TypeAnnotationTarget typeAnnotationTarget, TargetType targetType) {
     this.annotation = annotation;
     this.typePath = Collections.unmodifiableList(typePath);
     this.typeAnnotationTarget = typeAnnotationTarget;
+    this.targetType = targetType;
   }
   
 
@@ -66,6 +69,7 @@ public class TypeAnnotation {
     result = prime * result + ((annotation == null) ? 0 : annotation.hashCode());
     result = prime * result + ((typeAnnotationTarget == null) ? 0 : typeAnnotationTarget.hashCode());
     result = prime * result + ((typePath == null) ? 0 : typePath.hashCode());
+    result = prime * result + ((targetType == null) ? 0 : targetType.hashCode());
     return result;
   }
 
@@ -93,6 +97,11 @@ public class TypeAnnotation {
         return false;
     } else if (!typePath.equals(other.typePath))
       return false;
+    if (targetType == null) {
+      if (other.targetType != null)
+        return false;
+    } else if (!targetType.equals(other.targetType))
+      return false;
     return true;
   }
   
@@ -112,7 +121,8 @@ public class TypeAnnotation {
           new TypeAnnotation(
             annotation,
             tatt.typePath,
-            tatt.annotationTarget.acceptVisitor(converter)
+            tatt.annotationTarget.acceptVisitor(converter),
+            tatt.targetType
           )
         );
       }
@@ -123,12 +133,14 @@ public class TypeAnnotation {
     
   }
   
-  public static TypeAnnotation make(Annotation annotation, List<Pair<TypePathKind, Integer>> typePath, TypeAnnotationTarget typeAnnotationTarget) {
-    return new TypeAnnotation(annotation, typePath, typeAnnotationTarget);
+  public static TypeAnnotation make(Annotation annotation, List<Pair<TypePathKind, Integer>> typePath,
+      TypeAnnotationTarget typeAnnotationTarget, TargetType targetType) {
+    return new TypeAnnotation(annotation, typePath, typeAnnotationTarget, targetType);
   }
 
-  public static TypeAnnotation make(Annotation annotation, TypeAnnotationTarget typeAnnotationTarget) {
-    return new TypeAnnotation(annotation, TypeAnnotationsReader.TYPEPATH_EMPTY, typeAnnotationTarget);
+  public static TypeAnnotation make(Annotation annotation,
+      TypeAnnotationTarget typeAnnotationTarget, TargetType targetType) {
+    return new TypeAnnotation(annotation, TypeAnnotationsReader.TYPEPATH_EMPTY, typeAnnotationTarget, targetType);
   }
   
   public static abstract class TypeAnnotationTarget {
@@ -943,5 +955,9 @@ public class TypeAnnotation {
 
   public TypeAnnotationTarget getTypeAnnotationTarget() {
     return typeAnnotationTarget;
+  }
+
+  public TargetType getTargetType() {
+    return targetType;
   }
 }
