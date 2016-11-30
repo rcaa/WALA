@@ -96,12 +96,6 @@ public abstract class ShrikeBTMethod implements IMethod, BytecodeConstants {
      * Mapping from instruction index to program counter.
      */
     private int[] pcMap;
-
-    /**
-     * Mapping from program counter ro instruction index.
-     */
-    private int[] bcMap;
-
 /** BEGIN Custom change: precise positions */
     
     /**
@@ -479,7 +473,6 @@ public abstract class ShrikeBTMethod implements IMethod, BytecodeConstants {
       return;
     }
     info.pcMap = info.decoder.getInstructionsToBytecodes();
-    info.bcMap = info.decoder.getBytecodesToInstructions();
 
     processDebugInfo(info);
 
