@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -28,6 +29,8 @@ import com.ibm.wala.core.tests.util.TestAssertions;
 import com.ibm.wala.core.tests.util.WalaTestCase;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.shrikeCT.AnnotationsReader.ConstantElementValue;
+import com.ibm.wala.shrikeCT.AnnotationsReader.ElementValue;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TargetType;
@@ -38,6 +41,7 @@ import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.types.annotations.TypeAnnotation;
+import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.strings.Atom;
@@ -130,10 +134,15 @@ public class TypeAnnotationTest extends WalaTestCase {
     );
     
     
+    final Map<String,ElementValue> values = HashMapFactory.make();
+    values.put("someKey", new ConstantElementValue("lul"));
     // TODO: comment wrt. ClassLoaderReference in testClassAnnotations5() also applies here
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
-            Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),
+            Annotation.makeWithNamed(
+                TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse"),
+                values
+            ),
             new TypeAnnotation.OffsetTarget(instanceOfIIndex),
             TargetType.INSTANCEOF
         )

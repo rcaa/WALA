@@ -27,7 +27,7 @@ public class TypeAnnotatedClass1 extends @TypeAnnotationTypeUse Object {
     @TypeAnnotationTypeUse
     Object y = new Object();
     
-    if (y instanceof @TypeAnnotationTypeUse String) {
+    if (y instanceof @TypeAnnotationTypeUse(someKey = "lul") String) {
       x = 7;
     }
     
