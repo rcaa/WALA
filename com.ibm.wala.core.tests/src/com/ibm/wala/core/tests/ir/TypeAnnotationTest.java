@@ -57,9 +57,12 @@ public class TypeAnnotationTest extends WalaTestCase {
     this(new JVMLTestAssertions(), WalaTestCase.makeCHA());
   }
 
+  private final String typeAnnotatedClass1 = "Lannotations/TypeAnnotatedClass1";
+  private final String typeAnnotatedClass2 = "Lannotations/TypeAnnotatedClass2";
+  
   @Test
   public void testClassAnnotations5() throws Exception {
-    TypeReference typeUnderTest = TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/AnnotatedClass5");
+    TypeReference typeUnderTest = TypeReference.findOrCreate(ClassLoaderReference.Application, typeAnnotatedClass1);
 
     Collection<TypeAnnotation> expectedRuntimeInvisibleAnnotations = HashSetFactory.make();
     expectedRuntimeInvisibleAnnotations.add(
@@ -94,7 +97,7 @@ public class TypeAnnotationTest extends WalaTestCase {
     // Just change it whenever a test starts to fail
     final int instanceOfIIndex = 6;
     
-    TypeReference typeUnderTest = TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/AnnotatedClass5");
+    TypeReference typeUnderTest = TypeReference.findOrCreate(ClassLoaderReference.Application, typeAnnotatedClass1);
 
     MethodReference methodRefUnderTest = MethodReference.findOrCreate(typeUnderTest, Selector.make("foo(ILjava/lang/Object;)Ljava/lang/Integer;"));
     
@@ -167,7 +170,7 @@ public class TypeAnnotationTest extends WalaTestCase {
   
   @Test
   public void testClassAnnotations5field() throws Exception {
-    TypeReference typeUnderTest = TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/AnnotatedClass5");
+    TypeReference typeUnderTest = TypeReference.findOrCreate(ClassLoaderReference.Application, typeAnnotatedClass1);
 
     
     Collection<TypeAnnotation> expectedAnnotations = HashSetFactory.make();
@@ -193,7 +196,50 @@ public class TypeAnnotationTest extends WalaTestCase {
         )
     );
 
-    testFieldAnnotations(typeUnderTest, expectedAnnotations);
+    testFieldAnnotations("field", typeUnderTest, expectedAnnotations);
+  }
+  
+  private TypeAnnotation makeForAnnotations6(String annotation, List<Pair<TypePathKind, Integer>> path) {
+    return TypeAnnotation.make(
+        Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, typeAnnotatedClass2 + "$" + annotation)),
+        path,
+        new TypeAnnotation.EmptyTarget(),
+        TargetType.FIELD
+    );
+  }
+  
+  @Test
+  public void testClassAnnotations6field1() throws Exception {
+    TypeReference typeUnderTest = TypeReference.findOrCreate(ClassLoaderReference.Application, typeAnnotatedClass2);
+
+    Collection<TypeAnnotation> expectedAnnotations = HashSetFactory.make();
+    {
+      final List<Pair<TypePathKind, Integer>> pathA = new LinkedList<Pair<TypePathKind,Integer>>();
+      expectedAnnotations.add(makeForAnnotations6("A", pathA));
+    }
+    {  
+      final List<Pair<TypePathKind, Integer>> pathB = new LinkedList<Pair<TypePathKind,Integer>>();
+      pathB.add(Pair.make(TypeAnnotationsReader.TypePathKind.TYPE_ARGUMENT, 0));
+      expectedAnnotations.add(makeForAnnotations6("B", pathB));
+    }
+    {
+      final List<Pair<TypePathKind, Integer>> pathC = new LinkedList<Pair<TypePathKind,Integer>>();
+      pathC.add(Pair.make(TypeAnnotationsReader.TypePathKind.TYPE_ARGUMENT, 0));
+      pathC.add(Pair.make(TypeAnnotationsReader.TypePathKind.WILDCARD_BOUND, 0));
+      expectedAnnotations.add(makeForAnnotations6("C", pathC));
+    }
+    {
+      final List<Pair<TypePathKind, Integer>> pathD = new LinkedList<Pair<TypePathKind,Integer>>();
+      pathD.add(Pair.make(TypeAnnotationsReader.TypePathKind.TYPE_ARGUMENT, 1));
+      expectedAnnotations.add(makeForAnnotations6("D", pathD));
+    }
+    {
+      final List<Pair<TypePathKind, Integer>> pathE = new LinkedList<Pair<TypePathKind,Integer>>();
+      pathE.add(Pair.make(TypeAnnotationsReader.TypePathKind.TYPE_ARGUMENT, 1));
+      pathE.add(Pair.make(TypeAnnotationsReader.TypePathKind.TYPE_ARGUMENT, 0));
+      expectedAnnotations.add(makeForAnnotations6("E", pathE));
+    }
+    testFieldAnnotations("field1", typeUnderTest, expectedAnnotations);
   }
 
   private void testClassAnnotations(TypeReference typeUnderTest, Collection<TypeAnnotation> expectedRuntimeInvisibleAnnotations,
@@ -231,14 +277,14 @@ public class TypeAnnotationTest extends WalaTestCase {
   }
   
   
-  private void testFieldAnnotations(TypeReference typeUnderTest, Collection<TypeAnnotation> expectedAnnotations) throws IOException, ClassHierarchyException,
+  private void testFieldAnnotations(String fieldNameStr, TypeReference typeUnderTest, Collection<TypeAnnotation> expectedAnnotations) throws IOException, ClassHierarchyException,
       InvalidClassFileException {
     IClass classUnderTest = cha.lookupClass(typeUnderTest);
     harness.assertNotNull(typeUnderTest.toString() + " not found", classUnderTest);
     harness.assertTrue(classUnderTest + " must be BytecodeClass", classUnderTest instanceof ShrikeClass);
     ShrikeClass bcClassUnderTest = (ShrikeClass) classUnderTest;
 
-    final Atom fieldName = Atom.findOrCreateUnicodeAtom("field");
+    final Atom fieldName = Atom.findOrCreateUnicodeAtom(fieldNameStr);
     FieldImpl field = (FieldImpl) bcClassUnderTest.getField(fieldName);
     Collection<TypeAnnotation> annotations = field.getTypeAnnotations();
     harness.assertEqualCollections(expectedAnnotations, annotations);
