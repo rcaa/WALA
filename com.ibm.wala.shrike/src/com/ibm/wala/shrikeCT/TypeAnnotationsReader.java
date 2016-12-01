@@ -23,7 +23,7 @@ import com.ibm.wala.util.debug.Assertions;
 /**
  * This class reads TypeAnnotations attributes, i.e.: RuntimeInvisibleTypeAnnotations and RuntimeVisibleTypeAnnotations
  * 
- * @author Martin Hecker <martin.hecker@kit.edu>
+ * @author Martin Hecker martin.hecker@kit.edu
  */
 public class TypeAnnotationsReader extends AnnotationsReader {
 
@@ -61,6 +61,10 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     this.location = location;
   }
   
+  
+  /**
+   * @return a TypeAnnotationReader for reading type annotations in the attributes table of a ClassFile structure
+   */
   public static TypeAnnotationsReader getTypeAnnotationReaderAtClassfile(
       ClassReader.AttrIterator iter,
       String label,
@@ -68,7 +72,10 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     ) throws InvalidClassFileException {
     return new TypeAnnotationsReader(iter, label, null, null, signatureReader, TypeAnnotationLocation.ClassFile);
   }
-  
+
+  /**
+   * @return a TypeAnnotationReader for reading type annotations in the attributes table of a method_info structure
+   */
   public static TypeAnnotationsReader getTypeAnnotationReaderAtMethodInfo(
       ClassReader.AttrIterator iter,
       String label,
@@ -77,7 +84,10 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     ) throws InvalidClassFileException {
     return new TypeAnnotationsReader(iter, label, exceptionReader, null, signatureReader, TypeAnnotationLocation.method_info);
   }
-  
+
+  /**
+   * @return a TypeAnnotationReader for reading type annotations in the attributes table of a field_info structure
+   */
   public static TypeAnnotationsReader getTypeAnnotationReaderAtFieldInfo(
       ClassReader.AttrIterator iter,
       String label
@@ -85,6 +95,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     return new TypeAnnotationsReader(iter, label, null, null, null, TypeAnnotationLocation.field_info);
   }
   
+  /**
+   * @return a TypeAnnotationReader for reading type annotations in the attributes table of a Code attribute
+   */
   public static TypeAnnotationsReader getTypeAnnotationReaderAtCode(
       ClassReader.AttrIterator iter,
       String label,
@@ -95,19 +108,21 @@ public class TypeAnnotationsReader extends AnnotationsReader {
   
   
   /**
-   * 
+   * @return an array TypeAnnotationAttribute[] corresponding to the annotations[num_annotations] table
+   * specified as:
    * <pre>
-   * 
+   * {@code
    * RuntimeVisibleTypeAnnotations_attribute {
    *   u2              attribute_name_index;
    *   u4              attribute_length;
    *   u2              num_annotations;
    *   type_annotation annotations[num_annotations];
    * }
-   * 
-   * 
+   * }
+   * </pre>
    * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20"> JLS (SE8), 4.7.20</a>
    */
+  @SuppressWarnings("javadoc")
   public TypeAnnotationAttribute[] getAllTypeAnnotations() throws InvalidClassFileException {
     TypeAnnotationAttribute[] result = new TypeAnnotationAttribute[getAnnotationCount()];
     int offset = beginOffset + 8; // skip attribute_name_index,
@@ -122,8 +137,11 @@ public class TypeAnnotationsReader extends AnnotationsReader {
 
   
   /**
-  /**
-   * </pre>
+   * @param begin the offset from which to read a type annotation
+   * @return a Pair (a,i) such that "i" is the number of bytes read in order to construct "a", which is
+   * the {@link TypeAnnotationAttribute} that corresponds to the type_annotation structure at offset begin specified as:  
+   * <pre>
+   * {@code
    * type_annotation {
    *   u1 target_type;
    *   union {
@@ -145,11 +163,11 @@ public class TypeAnnotationsReader extends AnnotationsReader {
    *       element_value value;
    *   } element_value_pairs[num_element_value_pairs];
    * }
+   * }
    * </pre> 
    * 
-   * 
-   * @throws InvalidClassFileException
    */
+  @SuppressWarnings("javadoc")
   private Pair<TypeAnnotationAttribute, Integer> getTypeAttributeAndSize(int begin) throws InvalidClassFileException {
     TargetType target_type = TargetType.fromValue(cr.getUnsignedByte(begin));
     
@@ -235,17 +253,16 @@ public class TypeAnnotationsReader extends AnnotationsReader {
         checkSize(begin, 2);
         final int throwsIndex = cr.getUShort(begin);
         return Pair.<TypeAnnotationTarget, Integer>make(new ThrowsTarget(exceptionReader.getClasses()[throwsIndex]), 2);
-        
-        /*
-         * localvar_target {
-         * u2 table_length;
-         *   { u2 start_pc;
-               u2 length;
-               u2 index;
-         *   } table[table_length];
-         * }
-         */
       }
+      /*
+       * localvar_target {
+       * u2 table_length;
+       *   { u2 start_pc;
+             u2 length;
+             u2 index;
+       *   } table[table_length];
+       * }
+       */
       case localvar_target: {
         checkSize(begin, 2);
         final int table_length = cr.getUShort(begin);
@@ -291,7 +308,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
   }
   
   /**
-   * Bytecode locations where type annotation may appear at the corresponding attribute table.
+   * Enumeration of those Bytecode locations where type annotation may appear (in the corresponding attribute table).
    *  
    * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20"> JLS (SE8), 4.7.20</a>
    */
@@ -374,6 +391,27 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     
   }
   
+  /**
+   * A {@link TypeAnnotationTarget} represents one of the possible target_info structure 
+   * <pre>
+   * {@code
+   * union {
+   *     type_parameter_target;
+   *     supertype_target;
+   *     type_parameter_bound_target;
+   *     empty_target;
+   *     method_formal_parameter_target;
+   *     throws_target;
+   *     localvar_target;
+   *     catch_target;
+   *     offset_target;
+   *     type_argument_target;
+   * } target_info;
+   * }
+   * </pre>
+   * @author Martin Hecker martin.hecker@kit.edu  
+   */
+  @SuppressWarnings("javadoc")
   public static abstract class TypeAnnotationTarget {
     private final TargetInfo targetInfo;
     protected TypeAnnotationTarget(TargetInfo targetInfo) {
@@ -399,38 +437,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     R visitTypeArgumentTarget(TypeArgumentTarget target);
   }
   
-  public class ThrowingTypeAnnotationTargetVisitor<R> implements TypeAnnotationTargetVisitor<R> {
-    @Override
-    public R visitTypeParameterTarget(TypeParameterTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitSuperTypeTarget(SuperTypeTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitTypeParameterBoundTarget(TypeParameterBoundTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitEmptyTarget(EmptyTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitFormalParameterTarget(FormalParameterTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitThrowsTarget(ThrowsTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitLocalVarTarget(LocalVarTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitCatchTarget(CatchTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitOffsetTarget(OffsetTarget target) { throw new UnsupportedOperationException(); }
-
-    @Override
-    public R visitTypeArgumentTarget(TypeArgumentTarget target) { throw new UnsupportedOperationException(); }
-  }
-  
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-A.1"> JLS (SE8), 4.7.20.1 A</a>
+   */
   public static class TypeParameterTarget extends TypeAnnotationTarget {
     private final int type_parameter_index;
     public TypeParameterTarget(int type_parameter_index) {
@@ -448,6 +457,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
   }
 
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-B.1"> JLS (SE8), 4.7.20.1 B</a>
+   */
   public static class SuperTypeTarget extends TypeAnnotationTarget {
     private final String superType;
     public SuperTypeTarget(String superType) {
@@ -465,6 +477,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
   }
   
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-C.1"> JLS (SE8), 4.7.20.1 C</a>
+   */
   public static class TypeParameterBoundTarget extends TypeAnnotationTarget {
     private final int type_parameter_index;
     private final int bound_index;
@@ -495,6 +510,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
   }
 
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-D.1"> JLS (SE8), 4.7.20.1 D</a>
+   */
   public static class EmptyTarget extends TypeAnnotationTarget {
     public EmptyTarget() {
       super(TargetInfo.empty_target);
@@ -507,6 +525,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
   }
 
   
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-E.1"> JLS (SE8), 4.7.20.1 E</a>
+   */
   public static class FormalParameterTarget  extends TypeAnnotationTarget {
     private final int formal_parameter_index;
     public FormalParameterTarget(int index) {
@@ -524,6 +545,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
   }
   
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-F.1"> JLS (SE8), 4.7.20.1 F</a>
+   */
   public static class ThrowsTarget extends TypeAnnotationTarget {
     private final String throwType;
     public ThrowsTarget(String throwType) {
@@ -541,6 +565,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
   }
   
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-G.1"> JLS (SE8), 4.7.20.1 G</a>
+   */
   public static class LocalVarTarget extends TypeAnnotationTarget {
     private final int[] start_pc;
     private final int[] length;
@@ -576,6 +603,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
   }
   
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-H.1"> JLS (SE8), 4.7.20.1 H</a>
+   */
   public static class CatchTarget extends TypeAnnotationTarget {
     private final int[] rawHandler;
     private final String catchType;
@@ -618,6 +648,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
   }
   
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-I.1"> JLS (SE8), 4.7.20.1 I</a>
+   */
   public static class OffsetTarget extends TypeAnnotationTarget {
     private final int offset;
     
@@ -635,6 +668,9 @@ public class TypeAnnotationsReader extends AnnotationsReader {
     }
   }
   
+  /**
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.1-100-J.1"> JLS (SE8), 4.7.20.1 J</a>
+   */
   public static class TypeArgumentTarget extends TypeAnnotationTarget {
     private final int offset;
     private final int type_argument_index;

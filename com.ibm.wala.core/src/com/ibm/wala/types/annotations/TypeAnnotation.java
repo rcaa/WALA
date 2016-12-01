@@ -15,7 +15,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.ibm.wala.classLoader.FieldImpl;
 import com.ibm.wala.classLoader.IBytecodeMethod;
+import com.ibm.wala.classLoader.ShrikeCTMethod;
+import com.ibm.wala.classLoader.ShrikeClass;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader;
 import com.ibm.wala.shrikeCT.AnnotationsReader.AnnotationAttribute;
@@ -29,7 +32,18 @@ import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.collections.Pair;
 
-
+/**
+ * A {@link TypeAnnotation} represents a JSR 308 Java Type Annotation.
+ * 
+ * @author Martin Hecker martin.hecker@kit.edu
+ *
+ * @see Annotation
+ * @see TypeAnnotationTarget
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20">JLS (SE8), 4.7.20</a>
+ * @see <a href="https://jcp.org/en/jsr/detail?id=308">JSR 308: Annotations on Java Types</a> 
+ * @see <a href="http://types.cs.washington.edu/jsr308/">Type Annotations (JSR 308) and the Checker Framework</a>
+ * 
+ */
 public class TypeAnnotation {
   
   private final Annotation annotation;
@@ -130,16 +144,52 @@ public class TypeAnnotation {
     
   }
   
+  /**
+   * This method is intended to be used in testing only.
+   * 
+   * Otherwise, obtain TypeAnnotations from
+   * <ul>
+   *   <li> {@link ShrikeCTMethod#getTypeAnnotationsAtCode(boolean)} </li>
+   *   <li> {@link ShrikeCTMethod#getTypeAnnotationsAtMethodInfo(boolean)} </li>
+   *   <li> {@link FieldImpl#getTypeAnnotations()}
+   *   <li> {@link ShrikeClass#getTypeAnnotations(boolean)}
+   * </ul>
+   *  
+   * @return A {@link TypeAnnotation} comprised of annotation, typePath and targetType
+   */
   public static TypeAnnotation make(Annotation annotation, List<Pair<TypePathKind, Integer>> typePath,
       TypeAnnotationTarget typeAnnotationTarget, TargetType targetType) {
     return new TypeAnnotation(annotation, typePath, typeAnnotationTarget, targetType);
   }
 
+  /**
+   * This method is intended to be used in testing only.
+   * 
+   * Otherwise, obtain TypeAnnotations from
+   * <ul>
+   *   <li> {@link ShrikeCTMethod#getTypeAnnotationsAtCode(boolean)} </li>
+   *   <li> {@link ShrikeCTMethod#getTypeAnnotationsAtMethodInfo(boolean)} </li>
+   *   <li> {@link FieldImpl#getTypeAnnotations()}
+   *   <li> {@link ShrikeClass#getTypeAnnotations(boolean)}
+   * </ul>
+   *  
+   * @return A {@link TypeAnnotation} comprised of annotation, an empty typePath,  and targetType
+   */
   public static TypeAnnotation make(Annotation annotation,
       TypeAnnotationTarget typeAnnotationTarget, TargetType targetType) {
     return new TypeAnnotation(annotation, TypeAnnotationsReader.TYPEPATH_EMPTY, typeAnnotationTarget, targetType);
   }
   
+  /**
+   * A {@link TypeAnnotationTarget} represents the "target" of a Type Annotation.
+   * 
+   * In contrast to {@link com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypeAnnotationTarget},
+   * subclasses of {@link TypeAnnotationTarget} usually have already resolved bytecode-specific data
+   * (such as bcIndices) to their WALA counterparts.
+   * 
+   * @author Martin Hecker martin.hecker@kit.edu
+   *
+   */
   public static abstract class TypeAnnotationTarget {
     public static final int INSTRUCTION_INDEX_UNAVAILABLE = -1;
   }
@@ -462,7 +512,8 @@ public class TypeAnnotation {
   }
   
   public static class CatchTarget extends TypeAnnotationTarget {
-    // TODO: as per LocalVarTarget, can we record a meaningful range in terms of IInstriction[]
+    // TODO: as per LocalVarTarget, can we record a meaningful range in terms
+    // of IInstriction[] or SSAInstruction[] indices?!?! this is currently missing..
     private final int catchIIndex;
     private final TypeReference catchType;
 
@@ -589,7 +640,7 @@ public class TypeAnnotation {
       return iindex;
     }
 
-    public int getType_argument_index() {
+    public int getTypeArgumentIndex() {
       return type_argument_index;
     }
 
@@ -643,6 +694,14 @@ public class TypeAnnotation {
     return false;
   }
 
+  /**
+   * A @{TypeAnnotationTargetConverter} takes "unresolved" instances of
+   * {@link com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypeAnnotationTarget}, resolves some byte-code specific data,
+   * and returns instances of the corresponding {@link TypeAnnotationTarget} subclass.
+   * 
+   * @author Martin Hecker martin.hecker@kit.edu
+   *
+   */
   public static interface TypeAnnotationTargetConverter extends TypeAnnotationTargetVisitor<TypeAnnotationTarget> {}
   
   public static TypeAnnotationTargetConverter targetConverterAtCode(final ClassLoaderReference clRef, final IBytecodeMethod method) {
@@ -940,18 +999,32 @@ public class TypeAnnotation {
     };
   }
 
+  /**
+   * @return the {@link Annotation} of this {@link TypeAnnotation}
+   */
   public Annotation getAnnotation() {
     return annotation;
   }
 
+  /**
+   * @return the typePath of this {@link TypeAnnotation}
+   * 
+   * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.20.2"> JLS (SE8), 4.7.20.2</a>
+   */
   public List<Pair<TypePathKind, Integer>> getTypePath() {
     return typePath;
   }
 
+  /**
+   * @return the {@link TypeAnnotationTarget} of this {@link TypeAnnotation}
+   */
   public TypeAnnotationTarget getTypeAnnotationTarget() {
     return typeAnnotationTarget;
   }
 
+  /**
+   * @return the {@link TargetType} of this {@link TypeAnnotation}
+   */
   public TargetType getTargetType() {
     return targetType;
   }
