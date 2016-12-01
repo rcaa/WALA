@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2002,2006 IBM Corporation.
+ * Copyright (c) 2016 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Martin Hecker, KIT - initial API and implementation
  *******************************************************************************/
 package com.ibm.wala.shrikeCT;
 
@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypePathKind;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;
@@ -589,7 +588,7 @@ public class TypeAnnotationsReader extends AnnotationsReader {
       this.catchType = catchType;
     }
     /**
-     * @return The type-annotations targets raw handler, i.e.: a 4 tuple (startPC, endPC, catchClassIndex, catchPC)
+     * @return The type-annotations targets raw handler, i.e.: a 4 tuple (startPC, endPC, catchPC, catchClassIndex)
      * @see CodeReader
      */
     public int[] getRawHandler() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation.
+ * Copyright (c) 2013,2016 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     KIT, Martin Hecker - adaptation to type annotations
+ *     Martin Hecker, KIT - adaptation to type annotations
  *******************************************************************************/
 package com.ibm.wala.core.tests.ir;
 
@@ -116,7 +116,7 @@ public class TypeAnnotationTest extends WalaTestCase {
         )
     );
 
-    // TODO: see comment  above wrt, ClassLoaderReference
+    // TODO: comment wrt. ClassLoaderReference in testClassAnnotations5() also applies here
     final TypeReference runtimeExceptionRef = TypeReference.findOrCreate(ClassLoaderReference.Application, "Ljava/lang/RuntimeException");
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
@@ -127,7 +127,7 @@ public class TypeAnnotationTest extends WalaTestCase {
     );
     
     
-    // TODO: see comment  above wrt, ClassLoaderReference
+    // TODO: comment wrt. ClassLoaderReference in testClassAnnotations5() also applies here
     expectedRuntimeInvisibleAnnotations.add(
         TypeAnnotation.make(
             Annotation.make(TypeReference.findOrCreate(ClassLoaderReference.Application, "Lannotations/TypeAnnotationTypeUse")),

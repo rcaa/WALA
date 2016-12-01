@@ -1,15 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016 Joana IFC project,
- * Programming Paradigms Group,
- * Karlsruhe Institute of Technology (KIT).
- * 
+ * Copyright (c) 2016 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    martin.hecker@kit.edu, KIT - 
+ *     Martin Hecker, KIT - initial implementation
  *******************************************************************************/
 package annotations;
 

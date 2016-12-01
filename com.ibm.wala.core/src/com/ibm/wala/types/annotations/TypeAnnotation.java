@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation.
+ * Copyright (c) 2016 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Martin Hecker, KIT - initial implementation
  *******************************************************************************/
 package com.ibm.wala.types.annotations;
 
@@ -14,14 +14,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.TreeMap;
 
 import com.ibm.wala.classLoader.IBytecodeMethod;
-import com.ibm.wala.shrikeCT.AnnotationsReader;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader;
 import com.ibm.wala.shrikeCT.AnnotationsReader.AnnotationAttribute;
-import com.ibm.wala.shrikeCT.AnnotationsReader.ElementValue;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TargetInfo;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TargetType;
 import com.ibm.wala.shrikeCT.TypeAnnotationsReader.TypeAnnotationAttribute;
@@ -302,9 +299,7 @@ public class TypeAnnotation {
 
     @Override
     public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      return result;
+      return 1;
     }
 
     @Override
