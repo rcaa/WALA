@@ -253,7 +253,7 @@ public class DexIMethod implements IBytecodeMethod {
 
 
 	public String getLocalVariableName(int bcIndex, int localNumber) {
-		throw new UnsupportedOperationException("getLocalVariableName not implemented");
+		return null;
 	}
 
 	/**
