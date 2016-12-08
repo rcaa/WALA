@@ -23,7 +23,7 @@ public class NullPointerSolver<B extends ISSABasicBlock> extends DataflowSolver<
   private final IR ir;
 
   public NullPointerSolver(NullPointerFrameWork<B> problem, int maxVarNum, int[] paramVarNum, IR ir, B entry) {
-    this(problem, maxVarNum, paramVarNum, entry, ir, null);
+    this(problem, maxVarNum, paramVarNum, entry, ir, ParameterState.createDefault(ir.getMethod()));
   }
   
   public NullPointerSolver(NullPointerFrameWork<B> problem, int maxVarNum, int[] paramVarNum, B entry, IR ir, ParameterState initialState) {
