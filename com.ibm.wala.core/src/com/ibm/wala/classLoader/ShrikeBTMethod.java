@@ -227,7 +227,7 @@ public abstract class ShrikeBTMethod implements IMethod, BytecodeConstants {
   }
 
   /**
-   * @return Set <TypeReference>, the exceptions that statements in this method may throw,
+   * @return {@link Set}&lt;{@link TypeReference}&gt;, the exceptions that statements in this method may throw,
    * @throws InvalidClassFileException
    */
   public Collection<TypeReference> getImplicitExceptionTypes() throws InvalidClassFileException {
@@ -839,7 +839,7 @@ public abstract class ShrikeBTMethod implements IMethod, BytecodeConstants {
   }
 
   /**
-   * @return Set <TypeReference>
+   * @return {@link Set}&lt;{@link TypeReference}&gt;
    * @throws InvalidClassFileException
    */
   public Set<TypeReference> getCaughtExceptionTypes() throws InvalidClassFileException {
