@@ -136,4 +136,9 @@ public class IntentContext implements Context {
   public Intent getIntent() {
     return this.intent;
   }
+
+  @Override
+  public boolean covers(Context other) {
+    return this.equals(other) || (parent != null && parent.covers(other));
+  }
 }

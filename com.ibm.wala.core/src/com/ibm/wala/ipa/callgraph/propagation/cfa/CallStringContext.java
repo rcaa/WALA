@@ -47,4 +47,9 @@ public class CallStringContext implements Context {
       return null;
     }
   }
+
+  @Override
+  public boolean covers(Context other) {
+    return equals(other);
+  }
 }

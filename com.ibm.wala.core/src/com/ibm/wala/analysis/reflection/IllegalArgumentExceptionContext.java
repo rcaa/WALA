@@ -21,4 +21,9 @@ public class IllegalArgumentExceptionContext implements Context {
   public ContextItem get(ContextKey name) {
     return null;
   }
+
+  @Override
+  public boolean covers(Context other) {
+    return this.equals(other);
+  }
 }

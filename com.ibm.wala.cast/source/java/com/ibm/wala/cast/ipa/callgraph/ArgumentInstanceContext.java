@@ -77,6 +77,11 @@ public class ArgumentInstanceContext implements Context {
   public String toString() {
     return "ArgumentInstanceContext [base=" + base + ", index=" + index + ", instanceKey=" + instanceKey + "]";
   }
+
+  @Override
+  public boolean covers(Context other) {
+    return this.equals(other) || base.covers(other);
+  }
   
   
 }

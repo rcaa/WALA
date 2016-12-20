@@ -72,6 +72,11 @@ public abstract class CallStringContextSelector implements ContextSelector {
     public CallString getCallString() {
       return cs;
     }
+
+    @Override
+    public boolean covers(Context other) {
+      return this.equals(other) || base.covers(other);
+    }
   };
 
   private final ContextSelector base;

@@ -23,4 +23,5 @@ public interface Context {
    * @return the objects corresponding to a given name
    */
   ContextItem get(ContextKey name);
+  boolean covers(Context other);
 }

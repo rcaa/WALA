@@ -69,6 +69,11 @@ public class DelegatingContext implements Context {
   public String toString() {
     return "DelegatingContext [A=" + A + ", B=" + B + "]";
   }
+
+  @Override
+  public boolean covers(Context other) {
+    return equals(other) || A.covers(other) || B.covers(other);
+  }
   
   
 

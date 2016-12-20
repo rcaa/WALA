@@ -71,4 +71,9 @@ public class CallerContext implements Context {
     return caller;
   }
 
+  @Override
+  public boolean covers(Context other) {
+    return equals(other);
+  }
+
 }

@@ -83,6 +83,11 @@ public class SelectiveCPAContext implements Context {
         getClass().equals(other.getClass()) &&
         base.equals(((SelectiveCPAContext)other).base) &&
         parameterObjs.equals(((SelectiveCPAContext)other).parameterObjs);
+  }
+
+  @Override
+  public boolean covers(Context other) {
+    return equals(other) || base.covers(other);
   }     
 
 }

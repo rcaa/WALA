@@ -71,6 +71,11 @@ public class TargetMethodContextSelector implements ContextSelector {
       public boolean equals(Object o) {
         return (o instanceof MethodDispatchContext) && ((MethodDispatchContext) o).getTargetMethod().equals(M);
       }
+
+      @Override
+      public boolean covers(Context other) {
+        return this.equals(other);
+      }
     }
     ;
 

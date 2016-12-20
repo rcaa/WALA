@@ -80,4 +80,9 @@ public class JavaTypeContext implements Context {
     return type;
   }
 
+  @Override
+  public boolean covers(Context other) {
+    return this.equals(other);
+  }
+
 }

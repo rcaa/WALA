@@ -49,4 +49,9 @@ public class Everywhere implements Context {
   public boolean equals(Object obj) {
     return this == obj;
   }
+
+  @Override
+  public boolean covers(Context other) {
+    return equals(other);
+  }
 }

@@ -118,6 +118,11 @@ public class JavaScriptFunctionApplyContextSelector implements ContextSelector {
       return "ApplyContext [delegate=" + delegate + ", isNonNullArray=" + isNonNullArray + "]";
     }
 
+    @Override
+    public boolean covers(Context other) {
+      return equals(other) || delegate.covers(other);
+    }
+
   }
 
   @Override

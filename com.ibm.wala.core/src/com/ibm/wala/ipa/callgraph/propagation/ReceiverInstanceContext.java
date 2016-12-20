@@ -75,4 +75,9 @@ public class ReceiverInstanceContext implements Context {
   public InstanceKey getReceiver() {
     return ik;
   }
+
+  @Override
+  public boolean covers(Context other) {
+    return this.equals(other);
+  }
 }

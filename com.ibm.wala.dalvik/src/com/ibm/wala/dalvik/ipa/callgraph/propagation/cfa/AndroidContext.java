@@ -131,4 +131,9 @@ public class AndroidContext implements Context {
         return "AndroidContext: " + this.aCtxT + ", parent: " + this.parent;
       }
   }
+
+  @Override
+  public boolean covers(Context other) {
+      return equals(other) || this.parent.covers(other);
+  }
 }

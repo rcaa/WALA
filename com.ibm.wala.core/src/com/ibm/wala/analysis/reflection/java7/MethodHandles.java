@@ -153,6 +153,11 @@ public class MethodHandles {
     public String toString() {
       return "ctxt:" + method.getName();
     }
+
+    @Override
+    public boolean covers(Context other) {
+      return this.equals(other) || this.base.covers(other);
+    }
   }
   
   public static class ContextSelectorImpl implements ContextSelector {

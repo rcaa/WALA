@@ -118,6 +118,11 @@ public class ArgumentSpecialization {
     public String toString() {
       return base.toString() + "(nargs:" + argumentCount + ")";
     }
+
+    @Override
+    public boolean covers(Context other) {
+      return equals(other) || base.covers(other);
+    }
   }
 
   public static class ArgumentCountContextSelector implements ContextSelector, ContextKey {

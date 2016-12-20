@@ -139,4 +139,9 @@ public class GetMethodContext implements Context {
   public String getName() {
     return (String)name.getValue();
   }
+
+  @Override
+  public boolean covers(Context other) {
+    return this.equals(other);
+  }
 }
