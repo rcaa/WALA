@@ -40,7 +40,7 @@
   <target name="fetchJericho" depends="JerichoPresent" unless="jericho.present">
     <delete dir="${temp.folder}"/>
     <mkdir dir="${temp.folder}"/>
-    <get src="http://sourceforge.net/projects/jerichohtml/files/jericho-html/3.2/jericho-html-3.2.zip/download" dest="${temp.folder}/jericho-html-3.2.zip"/>
+    <get src="http://pkgs.fedoraproject.org/repo/pkgs/jericho-html/jericho-html-3.2.zip/7b38017c67089404b98e5902e5ee0702/jericho-html-3.2.zip" dest="${temp.folder}/jericho-html-3.2.zip"/>
     <unzip src="${temp.folder}/jericho-html-3.2.zip" dest="${temp.folder}"/>
     <copy file="${temp.folder}/jericho-html-3.2/dist/jericho-html-3.2.jar" tofile="${plugin.destination}/lib/jericho-html-3.2.jar" />
     <delete dir="${temp.folder}"/>
