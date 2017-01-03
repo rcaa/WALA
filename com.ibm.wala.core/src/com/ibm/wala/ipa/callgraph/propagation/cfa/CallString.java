@@ -76,6 +76,18 @@ public class CallString implements ContextItem {
     return false;
   }
 
+  public boolean isPrefixOf(CallString other) {
+    if (this.sites.length > other.sites.length) {
+      return false;
+    } else {
+      for (int i = 0; i < this.sites.length; i++) {
+        if (!this.sites[i].equals(other.sites[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
   public CallSiteReference[] getCallSiteRefs() {
     return this.sites;
   }

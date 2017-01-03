@@ -13,6 +13,7 @@ package com.ibm.wala.ipa.callgraph.propagation.cfa;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.ContextItem;
 import com.ibm.wala.ipa.callgraph.ContextKey;
+import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 
 public class CallStringContext implements Context {
   private final CallString cs;
@@ -50,6 +51,15 @@ public class CallStringContext implements Context {
 
   @Override
   public boolean covers(Context other) {
-    return equals(other);
+    if (!(other instanceof CallStringContext)) {
+      if (other instanceof Everywhere) {
+        return true;
+      } else {
+        return equals(other);
+      }
+    } else {
+      CallStringContext otherCSC = (CallStringContext) other;
+      return otherCSC.cs.isPrefixOf(this.cs);
+    }
   }
 }
