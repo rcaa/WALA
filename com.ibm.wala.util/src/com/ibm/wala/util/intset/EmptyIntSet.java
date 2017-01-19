@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 
 public class EmptyIntSet implements IntSet {
 
-	public static EmptyIntSet instance = new EmptyIntSet();
+	public static final EmptyIntSet instance = new EmptyIntSet();
 	
 	@Override
 	public boolean contains(int i) {
