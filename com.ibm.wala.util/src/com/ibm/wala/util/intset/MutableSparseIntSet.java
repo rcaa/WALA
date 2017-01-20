@@ -11,6 +11,7 @@
 package com.ibm.wala.util.intset;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import com.ibm.wala.util.debug.Assertions;
 
@@ -325,13 +326,28 @@ public class MutableSparseIntSet extends SparseIntSet implements MutableIntSet, 
 			return addAll((SparseIntSet) set);
 		} else {
 			int oldSize = size;
-			set.foreach(new IntSetAction() {
+			/*set.foreach(new IntSetAction() {
 				@Override
         public void act(int i) {
-					if (!contains(i))
+					//if (!contains(i))
 						add(i);
 				}
+			});*/
+			final int[] temp = new int[set.size()];
+			set.foreach(new IntSetAction() {
+        int index = 0;
+        
+        @Override
+        public void act(int i) {
+          temp[index] = i;
+          index++;
+        }
 			});
+			Arrays.parallelSort(temp);
+			if (elements == null) {
+			  elements = new int[0];
+			}
+			addAll(temp, temp.length);
 
 			if (DEBUG_LARGE && size() > TRAP_SIZE) {
 				Assertions.UNREACHABLE();
