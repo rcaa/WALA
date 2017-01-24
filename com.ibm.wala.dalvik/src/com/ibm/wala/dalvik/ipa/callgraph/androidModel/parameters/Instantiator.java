@@ -43,7 +43,6 @@ package com.ibm.wala.dalvik.ipa.callgraph.androidModel.parameters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -70,6 +69,7 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.ssa.IInstantiator;
 import com.ibm.wala.util.ssa.ParameterAccessor;
 import com.ibm.wala.util.ssa.SSAValue;
@@ -134,7 +134,7 @@ public class Instantiator implements IInstantiator {
         }
         if (seen == null) {
             logger.debug("Empty seen");
-            seen = new HashSet<SSAValue>();
+            seen = HashSetFactory.make();
         }
 
         { // Special type?
@@ -272,7 +272,7 @@ public class Instantiator implements IInstantiator {
         } else {
             // Abstract, Interface or array
             logger.debug("Not a regular class {}", T);
-            final Set<SSAValue> subInstances = new HashSet<SSAValue>();
+            final Set<SSAValue> subInstances = HashSetFactory.make();
             for (final TypeReference type : types) {
                 final IClass subKlass = this.cha.lookupClass(type);
 
@@ -287,7 +287,7 @@ public class Instantiator implements IInstantiator {
                     selectAndCallCtor(subInstance, seen);
                     assert (subInstance.getNumber() == newInst.getDef()) : "Unexpected: number and def differ: " + subInstance.getNumber() + ", " +
                                     newInst.getDef();
-                    final Set<SSAValue> newSeen = new HashSet<SSAValue>();  // Narf
+                    final Set<SSAValue> newSeen = HashSetFactory.make();  // Narf
                     newSeen.addAll(seen);
                     newSeen.add(subInstance);
                     seen = newSeen;
@@ -412,7 +412,7 @@ public class Instantiator implements IInstantiator {
             this.body.addConstant(nullSelf.getNumber(), new ConstantValue(null));
             nullSelf.setAssigned();
         //}
-        final Set<SSAValue> seen = new HashSet<SSAValue>(1 + overrides.size());
+        final Set<SSAValue> seen = HashSetFactory.make(1 + overrides.size());
         seen.add(nullSelf);
         seen.addAll(overrides);
         
@@ -434,7 +434,7 @@ public class Instantiator implements IInstantiator {
     private Set<TypeReference> getTypes(final TypeReference T) {
         final IClass cls = this.cha.lookupClass(T);
         if (isExcluded(cls)) {
-            return new HashSet<TypeReference>();
+            return HashSetFactory.make();
         }
         return getTypes(T, Collections.EMPTY_SET);
     }
@@ -444,7 +444,7 @@ public class Instantiator implements IInstantiator {
      */
     private Set<TypeReference> getTypes(final TypeReference T, final Set<TypeReference> seen) {
         logger.debug("getTypes({}, {})", T, seen);
-        final Set<TypeReference> ret = new HashSet<TypeReference>();
+        final Set<TypeReference> ret = HashSetFactory.make();
         ret.add(T);
        
         if (T.isPrimitiveType()) {

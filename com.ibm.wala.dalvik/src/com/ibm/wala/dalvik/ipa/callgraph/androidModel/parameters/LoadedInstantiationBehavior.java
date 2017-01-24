@@ -42,7 +42,6 @@ package com.ibm.wala.dalvik.ipa.callgraph.androidModel.parameters;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.ibm.wala.classLoader.IClass;
@@ -50,6 +49,7 @@ import com.ibm.wala.classLoader.IClassLoader;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeName;
+import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.strings.Atom;
 
 /**
@@ -124,7 +124,7 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
     }
 
     private InstanceBehavior defaultBehavior = null;
-    private final Map<BehaviorKey, BehviourValue> behaviours = new HashMap<BehaviorKey, BehviourValue>();
+    private final Map<BehaviorKey, BehviourValue> behaviours = HashMapFactory.make();
     private final IClassHierarchy cha;
 
     public LoadedInstantiationBehavior(IClassHierarchy cha) {
@@ -304,7 +304,7 @@ public class LoadedInstantiationBehavior extends IInstantiationBehavior implemen
         if (this.serializationIncludesCache) {
             stream.writeObject(this.behaviours);
         } else {
-            final Map<BehaviorKey, BehviourValue> strippedBehaviours = new HashMap<BehaviorKey, BehviourValue>();
+            final Map<BehaviorKey, BehviourValue> strippedBehaviours = HashMapFactory.make();
             for (final BehaviorKey key : this.behaviours.keySet()) {
                 final BehviourValue val = this.behaviours.get(key);
                 if (! val.isCached() ) {

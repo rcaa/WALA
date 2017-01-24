@@ -40,13 +40,12 @@
  */
 package com.ibm.wala.dalvik.ipa.callgraph.propagation.cfa;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.ipa.callgraph.propagation.ConstantKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.strings.Atom;
 import com.ibm.wala.util.strings.StringStuff;
 
@@ -58,8 +57,8 @@ import com.ibm.wala.util.strings.StringStuff;
  *  @author Tobias Blaschke <code@tobiasblaschke.de>
  */
 /*package*/ class IntentMap {
-    private final Map<InstanceKey, Intent> seen = new HashMap<InstanceKey, Intent>();
-    private final Map<Intent, Intent> immutables = new HashMap<Intent, Intent>();
+    private final Map<InstanceKey, Intent> seen = HashMapFactory.make();
+    private final Map<Intent, Intent> immutables = HashMapFactory.make();
 
     public Intent findOrCreateImmutable(final Intent intent) {
         if (immutables.containsKey(intent)) {

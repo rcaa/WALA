@@ -60,6 +60,7 @@ import org.jf.dexlib.Section;
 
 import com.ibm.wala.classLoader.Module;
 import com.ibm.wala.classLoader.ModuleEntry;
+import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.io.TemporaryFile;
 
 /**
@@ -107,7 +108,7 @@ public class DexFileModule implements Module {
         }
 
         // create ModuleEntries from ClassDefItem
-        entries = new HashSet<ModuleEntry>();
+        entries = HashSetFactory.make();
 
         Section<ClassDefItem> cldeff = dexfile.ClassDefsSection;
         for (ClassDefItem cdefitems : cldeff.getItems()) {

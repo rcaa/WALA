@@ -41,7 +41,6 @@
 package com.ibm.wala.dalvik.ipa.callgraph.androidModel.parameters;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -49,6 +48,7 @@ import java.util.logging.Logger;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.ssa.ParameterAccessor;
 import com.ibm.wala.util.ssa.SSAValue;
 
@@ -108,7 +108,7 @@ public class AndroidModelParameterManager {
     }
 
     /** The main data-structure of the management  */
-    private Map<TypeReference, List<ManagedParameter>> seenTypes = new HashMap<TypeReference, List<ManagedParameter>>();
+    private Map<TypeReference, List<ManagedParameter>> seenTypes = HashMapFactory.make();
 
     /**
      *  Setting the behaviour may be handy in the later model.
