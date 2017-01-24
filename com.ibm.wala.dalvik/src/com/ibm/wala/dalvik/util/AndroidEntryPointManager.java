@@ -80,7 +80,6 @@ import com.ibm.wala.util.strings.StringStuff;
 public final /* singleton */ class AndroidEntryPointManager implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(AndroidEntryPointManager.class);
 
-    public static AndroidEntryPointManager MANAGER = new AndroidEntryPointManager();
     private List<AndroidEntryPoint> ENTRIES = new ArrayList<AndroidEntryPoint>();
     /**
      * This is TRANSIENT!
@@ -102,12 +101,8 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
         return false;
     }
 
-    private AndroidEntryPointManager() {
+    public AndroidEntryPointManager() {
         this.ENTRIES = new ArrayList<AndroidEntryPoint>();
-    }
-
-    public static void reset() {
-        MANAGER = new AndroidEntryPointManager();
     }
 
     public Set<TypeReference> getComponents() {
@@ -537,13 +532,6 @@ public final /* singleton */ class AndroidEntryPointManager implements Serializa
         } else {
             setOverrideForce(from, to);
         }
-    }
-
-    public static final Map<Intent, Intent> DEFAULT_INTENT_OVERRIDES = HashMapFactory.make();
-    static {
-        DEFAULT_INTENT_OVERRIDES.put(
-                new AndroidSettingFactory.ExternalIntent("Landroid/intent/action/DIAL"),
-                new AndroidSettingFactory.ExternalIntent("Landroid/intent/action/DIAL"));
     }
 
     /**

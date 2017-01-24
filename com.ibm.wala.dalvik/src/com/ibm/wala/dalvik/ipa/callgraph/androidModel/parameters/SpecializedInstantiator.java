@@ -78,10 +78,10 @@ public class SpecializedInstantiator extends FlatInstantiator {
 
     final IInstantiator parent;
 
-    public SpecializedInstantiator(final VolatileMethodSummary body, final TypeSafeInstructionFactory instructionFactory,
+    public SpecializedInstantiator(final AndroidEntryPointManager manager, final VolatileMethodSummary body, final TypeSafeInstructionFactory instructionFactory,
             final SSAValueManager pm, final IClassHierarchy cha, final MethodReference scope, final AnalysisScope analysisScope,
             final IInstantiator parent) {
-        super(body, instructionFactory, pm, cha, scope, analysisScope, 100);
+        super(manager, body, instructionFactory, pm, cha, scope, analysisScope, 100);
         this.parent = parent;
     }
 
@@ -164,8 +164,8 @@ public class SpecializedInstantiator extends FlatInstantiator {
             // TODO: Can we create a tighter conterxt?
             // TODO: Force an Application-Context?
 
-            if (AndroidEntryPointManager.MANAGER.doFlatComponents()) {
-                final AndroidModelClass mClass = AndroidModelClass.getInstance(cha);
+            if (manager.doFlatComponents()) {
+                final AndroidModelClass mClass = AndroidModelClass.getInstance(this.manager, cha);
 
                 // At a given time context is expected to be only of one component already seen.
                 // If it's seen there is a field in AndroidModelClass.
@@ -196,7 +196,7 @@ public class SpecializedInstantiator extends FlatInstantiator {
                     appComponents.add(instance);
                 }
             } else {
-                for (TypeReference component : AndroidEntryPointManager.MANAGER.getComponents()) {
+                for (TypeReference component : manager.getComponents()) {
                     final VariableKey iKey = new SSAValue.TypeKey(component.getName());
 
                     if (this.pm.isSeen(iKey)) {

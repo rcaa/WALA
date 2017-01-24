@@ -95,11 +95,13 @@ import com.ibm.wala.util.CancelException;
  */
 public class IntentContextInterpreter implements SSAContextInterpreter {
     private final IntentStarters intentStarters;
+    private final AndroidEntryPointManager manager;
     private final IClassHierarchy cha;
     private final AnalysisOptions options;
     private final AnalysisCache cache;
 
-    public IntentContextInterpreter(IClassHierarchy cha, final AnalysisOptions options, final AnalysisCache cache) {
+    public IntentContextInterpreter(final AndroidEntryPointManager manager, IClassHierarchy cha, final AnalysisOptions options, final AnalysisCache cache) {
+        this.manager = manager;
         this.cha = cha;
         this.options = options;
         this.cache = cache;
@@ -166,7 +168,7 @@ public class IntentContextInterpreter implements SSAContextInterpreter {
             if (ctx.get(Intent.INTENT_KEY) != null) {
                 try { // Translate CancelException to IllegalStateException
                 final Intent inIntent = (Intent) ctx.get(Intent.INTENT_KEY);                // Intent without overrides
-                final Intent intent = AndroidEntryPointManager.MANAGER.getIntent(inIntent); // Apply overrides
+                final Intent intent = this.manager.getIntent(inIntent); // Apply overrides
                 final IMethod method = node.getMethod();
 
                 final AndroidModel model;
@@ -179,9 +181,9 @@ public class IntentContextInterpreter implements SSAContextInterpreter {
                     switch (type) {
                         case INTERNAL_TARGET:
                             info = intentStarters.getInfo(method.getReference());
-                            
-                            model = new MicroModel(this.cha, this.options, this.cache, intent.getAction());
-                            
+
+                            model = new MicroModel(this.manager, this.cha, this.options, this.cache, intent.getAction());
+
                             break;
                         case SYSTEM_SERVICE:
                             info = new IntentStarters.StartInfo(
@@ -190,14 +192,14 @@ public class IntentContextInterpreter implements SSAContextInterpreter {
                                     EnumSet.of(AndroidComponent.SERVICE),
                                     new int[] {1} );
 
-                            model = new SystemServiceModel(this.cha, this.options, this.cache, intent.getAction());
-                            
+                            model = new SystemServiceModel(this.manager, this.cha, this.options, this.cache, intent.getAction());
+
                             break;
                         case EXTERNAL_TARGET:
                             info = intentStarters.getInfo(method.getReference());
 
-                            model = new ExternalModel(this.cha, this.options, this.cache, fetchTargetComponent(intent,method));
-                            
+                            model = new ExternalModel(this.manager, this.cha, this.options, this.cache, fetchTargetComponent(intent,method));
+
                             break;
                         case STANDARD_ACTION:
                                     // TODO!
@@ -206,8 +208,8 @@ public class IntentContextInterpreter implements SSAContextInterpreter {
                         case UNKNOWN_TARGET:
                             info = intentStarters.getInfo(method.getReference());
 
-                            model = new UnknownTargetModel(this.cha, this.options, this.cache, fetchTargetComponent(intent, method));
-                            
+                            model = new UnknownTargetModel(this.manager, this.cha, this.options, this.cache, fetchTargetComponent(intent, method));
+
                             break;
                         case IGNORE:
                             
@@ -231,11 +233,11 @@ public class IntentContextInterpreter implements SSAContextInterpreter {
                 final IMethod method = node.getMethod();
                 final IntentStarters.StartInfo info = intentStarters.getInfo(method.getReference());
                 assert (info != null) : "IntentInfo is null! Every Starter should have an StartInfo... - Method " + method.getReference();
-                final Intent intent = new Intent(Intent.UNBOUND);
+                final Intent intent = new Intent(this.manager, Intent.UNBOUND);
                 final AndroidComponent targetComponent = fetchTargetComponent(intent, method);
 
                 try {
-                    final UnknownTargetModel model = new UnknownTargetModel(this.cha, this.options, this.cache, targetComponent);
+                    final UnknownTargetModel model = new UnknownTargetModel(this.manager, this.cha, this.options, this.cache, targetComponent);
                     final SummarizedMethod override = model.getMethodAs(method.getReference(), callingClass, intentStarters.getInfo(method.getReference()), node);
                     return override.makeIR(ctx, this.options.getSSAOptions());
                 } catch (CancelException e) {

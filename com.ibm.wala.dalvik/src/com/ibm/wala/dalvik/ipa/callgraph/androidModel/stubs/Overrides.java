@@ -80,12 +80,14 @@ import com.ibm.wala.util.collections.HashMapFactory;
 public class Overrides {
 //    private static Logger logger = LoggerFactory.getLogger(Overrides.class);
 
+    private final AndroidEntryPointManager manager;
     private final AndroidModel caller;
     private final IClassHierarchy cha;
     private final AnalysisOptions options;
     private final AnalysisCache cache;
 
-    public Overrides(AndroidModel caller, IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
+    public Overrides(AndroidEntryPointManager manager, AndroidModel caller, IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache) {
+        this.manager = manager;
         this.caller = caller;
         this.cha = cha;
         this.options = options;
@@ -200,17 +202,17 @@ public class Overrides {
     public MethodTargetSelector overrideAll() throws CancelException {
         final HashMap<MethodReference, SummarizedMethod> overrides = HashMapFactory.make();
         final Map<AndroidComponent, AndroidModel> callTo = new EnumMap<AndroidComponent, AndroidModel>(AndroidComponent.class);
-        final IProgressMonitor monitor = AndroidEntryPointManager.MANAGER.getProgressMonitor();
+        final IProgressMonitor monitor = manager.getProgressMonitor();
         int monitorCounter = 0;
 
         { // Make Mini-Models to override to
             for (final AndroidComponent target: AndroidComponent.values()) {
-                if (AndroidEntryPointManager.MANAGER.EPContainAny(target)) {
-                    final AndroidModel targetModel = new UnknownTargetModel(this.cha, this.options, this.cache, target);
-                    callTo.put(target, targetModel); 
+                if (manager.EPContainAny(target)) {
+                    final AndroidModel targetModel = new UnknownTargetModel(this.manager, this.cha, this.options, this.cache, target);
+                    callTo.put(target, targetModel);
                 } else {
-                    final AndroidModel targetModel = new ExternalModel(this.cha, this.options, this.cache, target);
-                    callTo.put(target, targetModel); 
+                    final AndroidModel targetModel = new ExternalModel(this.manager, this.cha, this.options, this.cache, target);
+                    callTo.put(target, targetModel);
                 }
             }
         }

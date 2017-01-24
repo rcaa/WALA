@@ -391,6 +391,7 @@ public class AndroidManifestXMLReader {
      */
     private static abstract class ParserItem {
         protected Tag self;
+        protected final AndroidEntryPointManager manager;
         /**
          *  Set the Tag this ParserItem-Instance is an Handler for.
          *
@@ -403,7 +404,8 @@ public class AndroidManifestXMLReader {
             this.self = self;
         }
         
-        public ParserItem() {
+        public ParserItem(final AndroidEntryPointManager manager) {
+            this.manager = manager;
         }
         
         /**
@@ -483,8 +485,8 @@ public class AndroidManifestXMLReader {
      *  Attributes.
      */
     private static class FinalItem extends ParserItem {
-        public FinalItem() {
-            super();
+        public FinalItem(final AndroidEntryPointManager manager) {
+            super(manager);
         }
         @Override
         public void leave() {
@@ -507,8 +509,8 @@ public class AndroidManifestXMLReader {
      *  It's like FinalItem but may contain sub-tags.
      */
     private static class NoOpItem extends ParserItem {
-        public NoOpItem() {
-            super();
+        public NoOpItem(AndroidEntryPointManager manager) {
+            super(manager);
         }
     }
 
@@ -516,13 +518,13 @@ public class AndroidManifestXMLReader {
      *  The root-element of an AndroidManifest contains the package.
      */
     private static class ManifestItem extends ParserItem {
-        public ManifestItem() {
-            super();
+        public ManifestItem(AndroidEntryPointManager manager) {
+            super(manager);
         }
         @Override
         public void enter(Attributes saxAttrs) {
             super.enter(saxAttrs);
-            AndroidEntryPointManager.MANAGER.setPackage((String) attributesHistory.get(Attr.PACKAGE).peek()); 
+            this.manager.setPackage((String) attributesHistory.get(Attr.PACKAGE).peek());
         }
     }
 
@@ -532,8 +534,8 @@ public class AndroidManifestXMLReader {
      *  @todo   Handle the URI
      */
     private static class IntentItem extends ParserItem {
-        public IntentItem() {
-            super();
+        public IntentItem(final AndroidEntryPointManager manager) {
+            super(manager);
         }
         @Override
         public void leave() {
@@ -586,7 +588,7 @@ public class AndroidManifestXMLReader {
                     if (urls.isEmpty()) urls.add(null);
                     for (String url : urls) {
                         logger.info("New Intent ({}, {})", name, url);
-                        final Intent intent = AndroidSettingFactory.intent(name, url);
+                        final Intent intent = AndroidSettingFactory.intent(this.manager, name, url);
                         attributesHistory.get(self).push(intent);
                     }
             }
@@ -604,8 +606,8 @@ public class AndroidManifestXMLReader {
     }
 
     private static class ComponentItem extends ParserItem {
-        public ComponentItem() {
-            super();
+        public ComponentItem(final AndroidEntryPointManager manager) {
+            super(manager);
         }
         @Override
          public void leave() {
@@ -652,16 +654,16 @@ public class AndroidManifestXMLReader {
             } else {
                 name = (String) attributesHistory.get(Attr.NAME).peek(); // TODO: Verify type!
             }
-            final Intent intent = AndroidSettingFactory.intent(pack, name, null);
+            final Intent intent = AndroidSettingFactory.intent(this.manager, pack, name, null);
 
             logger.info("\tRegister: {}", intent);
-            AndroidEntryPointManager.MANAGER.registerIntent(intent);
+            this.manager.registerIntent(intent);
             for (Intent ovr: overrideTargets) {
                 logger.info("\tOverride: {} --> {}", ovr, intent);
                 if (ovr.equals(intent)) {
-                    AndroidEntryPointManager.MANAGER.registerIntent(intent);
+                    this.manager.registerIntent(intent);
                 } else {
-                    AndroidEntryPointManager.MANAGER.setOverride(ovr, intent);
+                    this.manager.setOverride(ovr, intent);
                 }
             }
         }
