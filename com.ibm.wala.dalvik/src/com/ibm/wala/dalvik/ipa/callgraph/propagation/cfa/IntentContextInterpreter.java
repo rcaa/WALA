@@ -43,7 +43,6 @@ package com.ibm.wala.dalvik.ipa.callgraph.propagation.cfa;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.ibm.wala.cfg.ControlFlowGraph;
 import com.ibm.wala.classLoader.CallSiteReference;

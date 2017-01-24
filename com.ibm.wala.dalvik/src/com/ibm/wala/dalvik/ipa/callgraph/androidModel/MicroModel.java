@@ -40,8 +40,6 @@
  */
 package com.ibm.wala.dalvik.ipa.callgraph.androidModel;
 
-import java.util.logging.Logger;
-
 import com.ibm.wala.dalvik.ipa.callgraph.impl.AndroidEntryPoint;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;

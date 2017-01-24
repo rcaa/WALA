@@ -43,7 +43,6 @@ package com.ibm.wala.dalvik.ipa.callgraph.androidModel.parameters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.types.MethodReference;
