@@ -472,7 +472,12 @@ nextMethod:
         public AndroidEntryPoint.ExecutionOrder getSection() { return order.getSection(); }
         public static class ExecutionOrderComperator implements Comparator<AndroidPossibleEntryPoint> {
             @Override public int compare(AndroidPossibleEntryPoint a, AndroidPossibleEntryPoint b) {
-                return a.order.compareTo(b.order);
+                int cmpOrder = a.order.compareTo(b.order);
+                if (cmpOrder != 0) {
+                    return cmpOrder;
+                } else {
+                    return a.name.compareTo(b.name);
+                }
             }
         }
     }
