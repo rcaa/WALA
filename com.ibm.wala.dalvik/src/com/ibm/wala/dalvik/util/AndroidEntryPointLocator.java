@@ -169,7 +169,9 @@ nextMethod:
                     }
                 	// If there is a Method signature in the possible entry points use thatone
                     for (AndroidPossibleEntryPoint e: possibleEntryPoints) {
-                        if (e.name.equals(m.getName().toString()) ) {
+                    	final TypeReference possibleType = e.cls.toReference();
+                    	final boolean isAssignable = isAssignableFrom(cha, possibleType, cls); // TODO: re-arrange iteration-order such that this check is not repeated unnecessarily.
+                        if (e.name.equals(m.getName().toString()) && isAssignable) {
                             if (this.flags.contains(LocatorFlags.WITH_ANDROID)) {
                                 entryPoints.add(new AndroidEntryPoint(e, m, cha));
                             } else if (! isAPIComponent(m)) {
@@ -405,19 +407,31 @@ nextMethod:
         }
     }
 
+    private static boolean isAssignableFrom(IClassHierarchy cha, TypeReference c1, IClass c2) {
+    	for (IClass interfce : c2.getAllImplementedInterfaces()) {
+    		if (interfce.getReference().equals(c1)) return true;
+    	}
+    	IClass c = c2;
+    	do {
+    		if (c.getReference().equals(c1)) return true;
+    		c = c.getSuperclass();
+    	} while (c != null);
+    	return false;
+    }
+    
     private boolean isAPIComponent(final IMethod method) {
         return isAPIComponent(method.getDeclaringClass());
     }
 
     private boolean isAPIComponent(final IClass cls) {
         ClassLoaderReference clr = cls.getClassLoader().getReference();
-		if (! (clr.equals(ClassLoaderReference.Primordial) || clr.equals(ClassLoaderReference.Extension))) {
+		if ((clr.equals(ClassLoaderReference.Primordial))) {
             if (cls.getName().toString().startsWith("Landroid/")) {
                 return true;
             }
             return false;
         } else {
-            return true;
+            return false;
         }
     }
 
@@ -451,18 +465,18 @@ nextMethod:
      *  To extend the set of known definitions have a look at the classes ActivityEP, ServiceEP, ...
      */
     public static class AndroidPossibleEntryPoint implements AndroidEntryPoint.IExecutionOrder  {
-//        private final AndroidComponent cls;
+        private final AndroidComponent cls;
         private final String name;
         public final AndroidEntryPoint.ExecutionOrder order;
 
         public AndroidPossibleEntryPoint(AndroidComponent c, String n, ExecutionOrder o) { 
-//            cls = c; 
+            cls = c; 
             name = n; 
             order = o; 
         }
  
         public AndroidPossibleEntryPoint(AndroidComponent c, String n, AndroidPossibleEntryPoint o) { 
-//            cls = c; 
+            cls = c; 
             name = n; 
             order = o.order; 
         }
