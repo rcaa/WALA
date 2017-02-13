@@ -135,6 +135,7 @@ public class OrdinalSet<T> implements Iterable<T> {
     }
     
     if (A == EMPTY) {
+      if (B == EMPTY) return B;
       return new OrdinalSet<T>(B.S, B.mapping);
     }
     if (B == EMPTY) {
