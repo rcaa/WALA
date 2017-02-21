@@ -425,13 +425,13 @@ nextMethod:
 
     private boolean isAPIComponent(final IClass cls) {
         ClassLoaderReference clr = cls.getClassLoader().getReference();
-		if ((clr.equals(ClassLoaderReference.Primordial))) {
+        if (! (clr.equals(ClassLoaderReference.Primordial) || clr.equals(ClassLoaderReference.Extension))) {
             if (cls.getName().toString().startsWith("Landroid/")) {
                 return true;
             }
             return false;
         } else {
-            return false;
+            return true;
         }
     }
 
