@@ -11,6 +11,7 @@
 package com.ibm.wala.util.intset;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -93,14 +94,12 @@ public class SparseIntSet implements IntSet, Serializable {
     } else {
       elements = new int[S.size()];
       size = S.size();
-      S.foreach(new IntSetAction() {
-        private int index = 0;
 
-        @Override
-        public void act(int i) {
+      int index = 0;
+      for (IntIterator it = S.intIteratorSorted(); it.hasNext(); ) {
+          final int i = it.next();
           elements[index++] = i;
-        }
-      });
+      }
     }
   }
 
@@ -416,6 +415,15 @@ public class SparseIntSet implements IntSet, Serializable {
         return elements[i++];
       }
     };
+  }
+
+  /*
+   * (non-Javadoc)
+   * @see com.ibm.wala.util.intset.IntSet#intIteratorSorted()
+   */
+  @Override
+  public IntIterator intIteratorSorted() {
+    return intIterator();
   }
 
   /**
