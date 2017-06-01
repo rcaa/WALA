@@ -92,7 +92,7 @@ public abstract class IR {
   /**
    * subclasses must provide a source name mapping, if they want one (or null otherwise)
    */
-  protected abstract SSA2LocalMap getLocalMap();
+  public abstract SSA2LocalMap getLocalMap();
 
   /**
    * subclasses must provide information about indirect use of values, if appropriate, and otherwise null 
@@ -714,6 +714,15 @@ public abstract class IR {
      *         variable names are available, the name of the locals which v_vn represents. Otherwise, null.
      */
     String[] getLocalNames(int index, int vn);
+    
+    /**
+     * @return if local variable names are available, 
+     *         a map m s.t. m.get(v_vn) is the set of all local variable names for which we know that at some program counter,
+     *         v_vn corresponds to one or more local variable with that name.
+     *         
+     *         Otherwise, null.
+     */
+    Map<Integer, Set<String>> getLocalNames();
   }
 
   /**
